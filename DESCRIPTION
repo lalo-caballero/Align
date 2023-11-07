@@ -2,9 +2,9 @@ Package: Align
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Eduardo", "Caballero", , "ecaballero@ibecbarcelona.eu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9698-0749"))
+Description: Package for chromatogram alignment with POW algorithm (Fernandez, ND).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -14,3 +14,5 @@ Suggests:
 Config/testthat/edition: 3
 URL: https://github.com/lalo-caballero/Align
 BugReports: https://github.com/lalo-caballero/Align/issues
+Imports: 
+    Matrix
