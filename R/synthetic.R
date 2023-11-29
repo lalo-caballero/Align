@@ -27,14 +27,13 @@
 #' synthetic_signal(intensity = c(100, 600, 1000), baseline = seq(0, 150, by = 0.1))
 #' synthetic_signal(peaks = 10, length_out = 1500, noise = 10)
 
-synthetic_signal <- function(peaks = 1,
+synthetic_signal <- function(peaks = 2,
                              length_out = 1000,
                              intensity = 1000,
                              width= 5,
                              length_peaks = NULL,
                              baseline = NULL,
                              noise = NULL){
-
   # Check dimensions of input arguments
   if (length(peaks) == 1){
     n_peaks <- max(peaks, length(intensity), length(width), length(length_peaks))
@@ -48,7 +47,6 @@ synthetic_signal <- function(peaks = 1,
         (is.null(length_peaks) | length(length_peaks) == n_peaks))){
     stop("One or more arguments do not coincide with the number of peaks")
   }
-
   # Create the base signal with or without baseline
   signal <- rep(0, length_out)
   if (is.vector(baseline)){
@@ -57,16 +55,12 @@ synthetic_signal <- function(peaks = 1,
   } else if (!is.null(baseline)){
     warning("Baseline must be a vector, no baseline will be used")
   }
-
-  ## Create vectors
-
   # Create length_peaks vector
   if (length(length_peaks) == 1){
     length_peaks <- rep(length_peaks, n_peaks)
   } else if (is.null(length_peaks)){
     length_peaks <- rep(floor(length_out / n_peaks), n_peaks)
   }
-
   # Create starts vector
   if (length(peaks) == 1){
     starts <- rep(0, n_peaks)
@@ -76,29 +70,23 @@ synthetic_signal <- function(peaks = 1,
         starts[i] <- starts[i - 1] + length_peaks[i - 1]
       }
     }
-  } else if (is.null(peaks)){
-    starts <- seq(1, length_out, by = length_peaks)
   } else {
     starts <- peaks
   }
-
   # Create width vector
   if (length(width) == 1){
     width <- rep(width, n_peaks)
   }
-
   # Create intensity vector
   if (length(intensity) == 1){
     intensity <- rep(intensity, n_peaks)
   }
-
   # Add peaks to signal
   for (i in 1:n_peaks){
     peak <- generate_peak(intensity = intensity[i], length_peak = length_peaks[i], width = width[i])
     signal <- add_peak(signal = signal, peak = peak, start = starts[i])
   }
   signal <- signal[1:length_out]
-
   # Add noise
   if (!is.null(noise)){
     if (length(noise) == 1){
@@ -109,8 +97,6 @@ synthetic_signal <- function(peaks = 1,
   }
   return(signal)
 }
-
-
 
 #' Peak generator.
 #'
@@ -150,8 +136,13 @@ generate_peak <- function(intensity = 1, length_peak = 100, width = 5){
 #' signal <- rep(0, 150)
 #' peak <- generate_peak()
 #' add_peak(signal = signal, peak = peak, start = 25)
+
 add_peak <- function(signal, peak, start){
   length_peak <- length(peak)
   signal[(start) : (start + length_peak - 1)] <- signal[(start) : (start + length_peak - 1)] + peak
   return(signal)
 }
+
+
+
+

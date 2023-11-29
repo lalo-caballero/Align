@@ -5,7 +5,7 @@
 \title{Synthetic signal.}
 \usage{
 synthetic_signal(
-  peaks = 1,
+  peaks = 2,
   length_out = 1000,
   intensity = 1000,
   width = 5,

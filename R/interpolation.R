@@ -22,5 +22,5 @@ interpolation<-function(t,y){
   tr <- t[s] - ti
   g <- y[ti + 1] - y[ti]
   f <- y[ti] + tr * g
-  return (list(f <- f, s <- s, g <- g))
+  return (list(f = f, s = s, g = g))
 }
