@@ -92,7 +92,7 @@ synthetic_signal <- function(peaks = 2,
     if (length(noise) == 1){
       signal <- signal + sample(seq(-noise, noise, by = 0.1), length_out, replace = TRUE)
     } else {
-      warning("Noise must be an scalar, no noise will be added")
+      warning("Noise must be scalar, no noise will be added")
     }
   }
   return(signal)
@@ -145,4 +145,14 @@ add_peak <- function(signal, peak, start){
 
 
 
+synthetic_chromatogram<- function(){
+  peaks <- 104 * exp(0.4  * seq(0.5,7,by=0.5)) - 104
+  width <- seq(20,3,length.out=length(peaks))
+  chromatogram <- synthetic_signal(peaks = peaks,
+                                   length_out = 2000,
+                                   width = width,
+                                   baseline = NULL,
+                                   noise = NULL)
+  return(chromatogram)
+}
 

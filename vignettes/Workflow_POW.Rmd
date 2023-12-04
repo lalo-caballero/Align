@@ -1,0 +1,49 @@
+---
+title: "Workflow_POW"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Workflow_POW}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Align)
+```
+
+```{r}
+fom <- 'rms'
+figure <- 'variance'
+samples_dir <- "/storage/projects/Alignment/data_to_test_nptw/gaschrom/data_gaschrom.csv"
+p <- 10
+lambda2_min <- -4
+lambda2_max <- 8
+L <- 31
+```
+
+```{r}
+data <- read.csv(samples_dir, header = FALSE)
+idx_y <- select_reference(data)
+X <- as.matrix(data[-idx_y,])
+y <- as.matrix(data[idx_y,])
+m <- length(y)
+v <- rep(1,m)
+iv <- seq(2, m - 1, by = p)
+v[iv] <- 0
+W <- methods::as(methods::as(Matrix::Diagonal(x = v), "generalMatrix"), "CsparseMatrix")
+
+```
+
+```{r}
+lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
+#val<-compute_val_error_pow(X,y,W,fom,iv,lambdas)
+#e_ix <- val$e_ix
+```
+

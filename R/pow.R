@@ -46,10 +46,9 @@ pow <- function(x, y, lambda2, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
     r <- rep(0, m)
     g <- rep(0, m)
     inter <- interpolation(w, x)
-    z <- inter$f
+    z <- inter$f / norm(inter$f, "2")
     sel <- inter$s
     dg <- inter$g
-    z <- z / norm(z, "2")
     g[sel] <- dg
     G <- methods::as(methods::as(Matrix::Diagonal(x = g), "generalMatrix"), "CsparseMatrix")
     r[sel] <- y[sel] - z
@@ -66,7 +65,7 @@ pow <- function(x, y, lambda2, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
       diffw <- c(w[2] - w[1], 0.5 * (w[3 : length(w)] - w[1 : (length(w) - 2)]), w[length(w)]-w[(length(w) - 1)])
       diffw <- as.numeric(diffw <= 0)
       P <- methods::as(methods::as(Matrix::Diagonal(x = diffw), "generalMatrix"), "CsparseMatrix")
-      w <- w + dw
+      w <- w - dw
     }
     C <- W %*% G %*% G + lambda2 * Matrix::t(D) %*% D + lambda1 * P
     dw <- as.vector(Matrix::solve(C, (W %*% g * r)))
