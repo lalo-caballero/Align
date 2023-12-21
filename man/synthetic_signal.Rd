@@ -8,7 +8,8 @@ synthetic_signal(
   peaks = 2,
   length_out = 1000,
   intensity = 1000,
-  width = 5,
+  alpha = 0,
+  xi = 0,
   length_peaks = NULL,
   baseline = NULL,
   noise = NULL
@@ -24,9 +25,11 @@ or a vector with the starting points for each peak.}
 peaks will have the same intensity, if a vector each value will correspond to
 a peak.}
 
-\item{width}{The width of the peaks, if a scalar the same width will be used
-for all peaks, if a vector each value will correspond to a peak. The parameter
-will be passed to function 'dnorm()' where sd = length_peak / width.}
+\item{alpha}{For the shape of each peak, if a vector each value will
+correspond to a peak, changes the shape to the first half of each peak}
+
+\item{xi}{For the shape of each peak, if a vector each value will
+correspond to a peak, changes the center of the peak}
 
 \item{length_peaks}{The length of each peak (in indexes), if a scalar all
 peaks will have the same length, if a vector each value will correspond to

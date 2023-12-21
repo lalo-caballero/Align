@@ -2,26 +2,29 @@
 % Please edit documentation in R/interpolation.R
 \name{interpolation}
 \alias{interpolation}
-\title{Linear interpolation.}
+\title{Interpolation.}
 \usage{
-interpolation(t, y)
+interpolation(w, x, return = TRUE)
 }
 \arguments{
-\item{t}{points at which to compute interpolated values.}
+\item{w}{points at which to compute interpolated values.}
 
-\item{y}{signal to be interpolated.}
+\item{x}{signal to be interpolated.}
+
+\item{return}{if TRUE it will return f,s, and g; if FALSE it will return the warped x}
 }
 \value{
 a list with:
 f: the interpolated signal,
 s: points  of t with  1<= t & t <= length of y
 g: gradient of y at points t.
+or the warped x
 }
 \description{
 Interpolates a vector.
 }
 \examples{
-t <- c(1:10)
-y <- c(1:10)
-interpolation(t,y)
+w <- c(1:10)
+x <- c(1:10)
+interpolation(w,x)
 }

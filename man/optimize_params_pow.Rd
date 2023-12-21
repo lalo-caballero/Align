@@ -9,7 +9,7 @@ optimize_params_pow(n_samples, params, ti_ix, e_ix)
 \arguments{
 \item{n_samples}{number of samples or signals to be used}
 
-\item{params}{parametros}
+\item{params}{parameters}
 
 \item{ti_ix}{matrix with time inversions}
 

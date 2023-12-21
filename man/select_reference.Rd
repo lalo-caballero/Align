@@ -4,7 +4,7 @@
 \alias{select_reference}
 \title{Select reference sample}
 \usage{
-select_reference(data, figure = "variance")
+select_reference(data, figure = "correlation")
 }
 \arguments{
 \item{data}{a matrix with all the samples (by row)}

@@ -8,10 +8,10 @@
 #'
 #' @examples
 
-select_reference <- function(data, figure = 'variance') {
+select_reference <- function(data, figure = 'correlation') {
   data <- as.matrix(data)
   n_samples <- nrow(data)
-  norms <- sqrt(rowSums(data^2))
+  norms <- sqrt(rowSums(data ^ 2))
   correlation_matrix <- (data %*% t(data)) / (norms %*% t(norms))
   diag(correlation_matrix) <- 0
   mean_correlation <- rowMeans(correlation_matrix, na.rm = TRUE)

@@ -1,0 +1,169 @@
+---
+title: "Comparison_POW_PTW"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Workflow_POW}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Align)
+library(ggplot2)
+```
+
+```{r}
+fom <- 'rms'
+p <- 10
+lambda2_min <- -4
+lambda2_max <- 8
+L <- 31
+```
+
+```{r}
+library(GCIMS)
+library(BiocParallel)
+show_progress_bar <- interactive() && is.null(getOption("knitr.in.progress"))
+register(SnowParam(workers = parallel::detectCores()/2, progressbar = show_progress_bar, exportglobals = FALSE), default = TRUE)
+samples_directory<- "/storage/projects/TargetML/KETONES"
+annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+dataset1 <- GCIMSDataset$new(
+  annotations,
+  base_dir = samples_directory,
+  on_ram = FALSE
+)
+filterRt(dataset1, rt = c(0, 1500)) # in s
+filterDt(dataset1, dt = c(5, 16)) # in ms
+dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
+decimate(dataset1, rt_factor = 1, dt_factor = 2)
+#dataset1 <- align_ip(dataset1)
+dataset1$realize()
+data <- dataset1$getRIC()
+data <- data[-c(26,27,32,34,36,37,38),]
+```
+
+
+```{r}
+# set.seed(151)
+# data <- create_synthetic_dataset(n_samples = 10,
+#                                  n_peaks = 10,
+#                                  length_out = 1500,
+#                                  mov_peaks = 5,
+#                                  intensity = 500,
+#                                  random_intensity = 50)
+```
+
+```{r}
+idx_y <- select_reference(data)
+X <- as.matrix(data[-idx_y,])
+y <- as.matrix(data[idx_y,])
+n_samples <- nrow(X)
+m <- length(y)
+v <- rep(1,m)
+iv <- seq(2, m - 1, by = p)
+v[iv] <- 0
+W <- Matrix::Diagonal(x = v)
+```
+
+```{r}
+lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
+val<-compute_val_error(X,y,W,fom,iv,lambdas)
+e_ix <- val$e_ix
+ti_ix <- val$ti_ix
+opar = optimize_params_pow(n_samples, lambdas, ti_ix, e_ix);
+best_lambdas2 <- opar$best_params
+lambdas2_idx <- opar$params_idx
+```
+
+```{r}
+XW <- apply_pow(X, y, best_lambdas2)
+```
+
+```{r}
+optimize_polynomial_order <- function(ric_sample, ric_ref) {
+  correction_type_options <- seq.int(0, 10)
+  poly_orders <- seq.int(1, 10)
+  xi <- seq_len(length(ric_sample))
+  corr <- numeric(length(poly_orders) + 1L)
+  corr[1] <- stats::cor(ric_ref, ric_sample, use = "complete.obs")
+  for (j in seq_along(poly_orders)) {
+    poly <- rep(0, poly_orders[j])
+    poly[2] <- 1
+    corr[j + 1L] <- stats::cor(
+      ric_ref,
+      as.numeric(ptw::ptw(ref = ric_ref, samp = ric_sample, init.coef = poly)$warped.sample[1,]),
+      use = "complete.obs"
+    )
+  }
+  correction_type_options[which.max(corr)]
+}
+```
+
+```{r}
+xp<-XW*0
+wp<-XW*0
+order_p<-c()
+for (i in 1:(nrow(xp))){
+  poly_order <- optimize_polynomial_order(X[i,], as.numeric(y))
+  poly <- rep(0, poly_order + 1L)
+  poly[2] <- 1
+  align_result <- ptw::ptw(ref = as.numeric(y), samp = X[i,], init.coef = poly)
+  xp[i,]<-align_result$warped.sample
+  wp[i,]<-align_result$warp.fun
+  order_p <- c(order_p,poly_order)
+}
+```
+
+```{r}
+df_align <- data.frame(t(XW))
+df_align <- cbind(df_align,T=c(1:nrow(df_align)))
+df_align <- reshape2::melt(df_align,"T")
+a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+
+df_pre_align <- data.frame(t(X))
+df_pre_align <- cbind(df_pre_align,T=c(1:nrow(df_pre_align)))
+df_pre_align <- reshape2::melt(df_pre_align,"T")
+b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+
+df_ptw <- data.frame(t(xp))
+df_ptw <- cbind(df_ptw,T=c(1:nrow(df_ptw)))
+df_ptw <- reshape2::melt(df_ptw,"T")
+c<-ggplot(data=df_ptw, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+
+cowplot::plot_grid(a,b,c)
+```
+
+```{r}
+image(c(1:3729),c(1:30),t(XW),col=hcl.colors(10, "Grays"))
+```
+
+```{r}
+image(c(1:2511),c(1:31),t(data),col=hcl.colors(10, "Grays"))
+```
+
+```{r}
+image(c(1:2511),c(1:30),t(xp),col=hcl.colors(10, "Grays"))
+```
+
+```{r}
+dwp <- diff(wp)
+df_wp <- data.frame(t(wp))
+df_wp <- cbind(df_wp,T=c(1:nrow(df_wp)))
+df_wp <- reshape2::melt(df_wp,"T")
+ggplot(data=df_wp, aes(x=T, y=value, col=variable))+geom_line()
+```
+
+```{r}
+df_align <- data.frame(cbind(t(XW),y))
+df_align <- cbind(df_align,T=c(1:nrow(df_align)))
+df_align <- reshape2::melt(df_align,"T")
+b<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+```
+

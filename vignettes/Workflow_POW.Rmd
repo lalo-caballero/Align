@@ -16,12 +16,12 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(Align)
+library(ggplot2)
+library(BiocParallel)
 ```
 
 ```{r}
 fom <- 'rms'
-figure <- 'variance'
-samples_dir <- "/storage/projects/Alignment/data_to_test_nptw/gaschrom/data_gaschrom.csv"
 p <- 10
 lambda2_min <- -4
 lambda2_max <- 8
@@ -29,21 +29,66 @@ L <- 31
 ```
 
 ```{r}
-data <- read.csv(samples_dir, header = FALSE)
+#samples_dir <- "/storage/projects/Alignment/data_to_test_nptw/gaschrom/data_gaschrom.csv"
+#data <- read.csv(samples_dir, header = FALSE)
+```
+
+```{r}
+set.seed(100)
+data <- create_synthetic_dataset(n_samples = 15,
+                                 n_peaks = 10,
+                                 length_out = 1500,
+                                 mov_peaks = 5,
+                                 intensity = 500,
+                                 random_intensity = 50)
+```
+
+```{r}
 idx_y <- select_reference(data)
 X <- as.matrix(data[-idx_y,])
 y <- as.matrix(data[idx_y,])
+n_samples <- nrow(X)
 m <- length(y)
 v <- rep(1,m)
 iv <- seq(2, m - 1, by = p)
 v[iv] <- 0
-W <- methods::as(methods::as(Matrix::Diagonal(x = v), "generalMatrix"), "CsparseMatrix")
-
+W <- Matrix::Diagonal(x = v)
 ```
 
 ```{r}
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-#val<-compute_val_error_pow(X,y,W,fom,iv,lambdas)
-#e_ix <- val$e_ix
+val<-compute_val_error_pow(X,y,W,fom,iv,lambdas)
+e_ix <- val$e_ix
+ti_ix <- val$ti_ix
+opar = optimize_params_pow(n_samples, lambdas, ti_ix, e_ix);
+best_lambdas2 <- opar$best_params
+lambdas2_idx <- opar$params_idx
 ```
+
+```{r}
+XW <- apply_pow(X, y, best_lambdas2)
+```
+
+```{r}
+df_align <- data.frame(t(XW))
+df_align <- cbind(df_align,T=c(1:nrow(df_align)))
+df_align <- reshape2::melt(df_align,"T")
+a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()
+
+df_pre_align <- data.frame(t(X))
+df_pre_align <- cbind(df_pre_align,T=c(1:nrow(df_pre_align)))
+df_pre_align <- reshape2::melt(df_pre_align,"T")
+b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()
+cowplot::plot_grid(a,b)
+```
+
+```{r}
+image(c(1:1500),c(1:14),t(XW),col=hcl.colors(10, "Grays"))
+```
+
+```{r}
+image(c(1:1500),c(1:15),t(data),col=hcl.colors(10, "Grays"))
+```
+
+
 

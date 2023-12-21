@@ -13,10 +13,7 @@
 #' @param min_drms minimum difference in absolute value of RMS.
 #' @param verbose by default 'FALSE'to privide information in the console
 #'
-#' @return A 'list' with:
-#' w: Warping function
-#' sel: part of y that can be fitted
-#' rms: prediction error.
+#' @return warp
 #'
 #' @export
 #'
@@ -79,6 +76,35 @@ pow <- function(x, y, lambda2, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
   if (it == max_it & verbose){
     cat("The computation exceeded the maximum number of iterations")
   }
-  return(list(w = w, sel = sel))
+  return(w)
 }
 
+
+#' Apply POW
+#'
+#' @param X A matrix with the samples to align
+#' @param y The reference signal
+#' @param lambdas the lambda to be used for the alignment of each sample
+#' @param max_it maximum iterations to be done in the POW alignment
+#'
+#' @return a list with:
+#' warped_samples
+#' warps
+#' @export
+#'
+#' @examples
+apply_pow <- function(X, y, lambdas, max_it = 1000){
+
+  ### FIXME try mapply
+  n_samples <- nrow(X)
+  XW <- X * 0
+  for (i in 1:n_samples){
+    w <- pow(X[i, ], y, lambdas[i], max_it = max_it)
+    interp <- interpolation(w, X[i, ])
+    xw <- interp$f
+    sel <- interp$s
+    XW[i,sel] <- xw
+    XW[i,-sel] <- NA
+  }
+  return (XW)
+}

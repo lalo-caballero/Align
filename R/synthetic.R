@@ -8,9 +8,10 @@
 #' @param intensity The maximum intensity of the peaks, if is a scalar all
 #' peaks will have the same intensity, if a vector each value will correspond to
 #' a peak.
-#' @param width The width of the peaks, if a scalar the same width will be used
-#' for all peaks, if a vector each value will correspond to a peak. The parameter
-#' will be passed to function 'dnorm()' where sd = length_peak / width.
+#' @param alpha For the shape of each peak, if a vector each value will
+#' correspond to a peak, changes the shape to the first half of each peak
+#' @param xi For the shape of each peak, if a vector each value will
+#' correspond to a peak, changes the center of the peak
 #' @param length_peaks The length of each peak (in indexes), if a scalar all
 #' peaks will have the same length, if a vector each value will correspond to
 #' a peak.
@@ -30,20 +31,22 @@
 synthetic_signal <- function(peaks = 2,
                              length_out = 1000,
                              intensity = 1000,
-                             width= 5,
+                             alpha= 0,
+                             xi = 0,
                              length_peaks = NULL,
                              baseline = NULL,
                              noise = NULL){
   # Check dimensions of input arguments
   if (length(peaks) == 1){
-    n_peaks <- max(peaks, length(intensity), length(width), length(length_peaks))
+    n_peaks <- max(peaks, length(intensity), length(alpha), length(xi), length(length_peaks))
   } else {
-    n_peaks <- max(length(peaks), length(intensity), length(width), length(length_peaks))
+    n_peaks <- max(length(peaks), length(intensity), length(alpha), length(xi), length(length_peaks))
   }
 
   if (!((length(peaks) == 1 | length(peaks) == n_peaks) &
         (length(intensity) == 1 | length(intensity) == n_peaks) &
-        (length(width) == 1 | length(width) == n_peaks) &
+        (length(alpha) == 1 | length(alpha) == n_peaks) &
+        (length(xi) == 1 | length(xi) == n_peaks) &
         (is.null(length_peaks) | length(length_peaks) == n_peaks))){
     stop("One or more arguments do not coincide with the number of peaks")
   }
@@ -73,9 +76,13 @@ synthetic_signal <- function(peaks = 2,
   } else {
     starts <- peaks
   }
-  # Create width vector
-  if (length(width) == 1){
-    width <- rep(width, n_peaks)
+  # Create alpha vector
+  if (length(alpha) == 1){
+    alpha <- rep(alpha, n_peaks)
+  }
+  # Create xi vector
+  if (length(xi) == 1){
+    xi <- rep(xi, n_peaks)
   }
   # Create intensity vector
   if (length(intensity) == 1){
@@ -83,7 +90,7 @@ synthetic_signal <- function(peaks = 2,
   }
   # Add peaks to signal
   for (i in 1:n_peaks){
-    peak <- generate_peak(intensity = intensity[i], length_peak = length_peaks[i], width = width[i])
+    peak <- generate_peak(intensity = intensity[i], length_peak = length_peaks[i], alpha = alpha[i], xi = xi[i])
     signal <- add_peak(signal = signal, peak = peak, start = starts[i])
   }
   signal <- signal[1:length_out]
@@ -98,25 +105,97 @@ synthetic_signal <- function(peaks = 2,
   return(signal)
 }
 
+#' Synthetic chromatogram.
+#'
+#' Creates a synthetic chromatogram.
+#'
+#' @param n_peaks Number of peaks to be added
+#' @param length_out length of the signal to be created
+#' @param intensity average intensity of the peaks
+#' @param random_intensity random maximum value to add or subtract to the intensity
+#' @param mov_peaks randomness of the peaks, the smaller it is the most each peak can move
+#' @param alpha
+#' @param xi
+#'
+#' @return a vector that contains a synthetic chromatogram
+#' @export
+#'
+#' @examples
+
+synthetic_chromatogram<- function(n_peaks,
+                                  length_out = 2000,
+                                  intensity = 1000,
+                                  random_intensity = NULL,
+                                  mov_peaks = NULL,
+                                  alpha = 3,
+                                  xi = -2){
+  max_peak <- 104 * exp(0.4 * seq(0,n_peaks)) - 104 ##FIXME seq con n_peaks no ideal
+  max_peak <- utils::tail(which (max_peak < (length_out - floor(length_out / n_peaks))), 1) - 1
+  x <- seq(0.1, max_peak, length.out = n_peaks)
+  if (!is.null(mov_peaks)){
+    mov_peaks <- (x[2]-x[1])/mov_peaks
+    mov_peaks <- sample(seq(- mov_peaks, mov_peaks, by =0.01), n_peaks, replace = TRUE)
+    x <- x + mov_peaks
+  }
+  peaks <- 104 * exp(0.4  * x) - 104
+  if (peaks[1] < 1 ){
+    peaks[1] <- 1
+  }
+    if (!is.null(random_intensity)){
+      intensity <- sample(seq((intensity - random_intensity),(intensity + random_intensity)), n_peaks, replace = TRUE)
+    }
+  chromatogram <- synthetic_signal(peaks = peaks,
+                                   length_out = length_out,
+                                   intensity = intensity,
+                                   alpha = alpha,
+                                   xi= xi)
+  return(chromatogram)
+}
+
+#' Create Synthetic dataset.
+#'
+#' @param n_samples a
+#' @param n_peaks a
+#' @param length_out a
+#' @param mov_peaks a
+#' @param intensity a
+#' @param random_intensity a
+#'
+#' @return synthetic dataset.
+#' @export
+#'
+#' @examples
+create_synthetic_dataset <- function(n_samples, n_peaks, length_out, mov_peaks, intensity, random_intensity){
+  dataset <- matrix(nrow = n_samples, ncol = length_out)
+  for (i in 1:n_samples){
+    dataset[i,] <- synthetic_chromatogram(n_peaks = n_peaks,
+                                          length_out = length_out,
+                                          intensity = intensity,
+                                          random_intensity = random_intensity,
+                                          mov_peaks = mov_peaks)
+  }
+  return(dataset)
+}
+
 #' Peak generator.
 #'
 #' Generates a peak with normal distribution.
 #'
 #' @param intensity Maximum intensity of the peak.
 #' @param length_peak Length of the peak in indexes.
-#' @param width Width of the peak, this parameter will be passed to 'dnorm()'
-#' and used as sd = length_peak / width.
+#' @param alpha for skewed normal distribution, modifies the first half of the peak
+#' @param xi for skewed normal distribution, moves the center of the distribution
 #'
 #' @return A vector with a peak.
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' generate_peak()
 #' generate_peak(intensity = 500)
-#' generate_peak(length_peak = 150, width = 20)
+#' generate_peak(length_peak = 150, alpha = 1)
 
-generate_peak <- function(intensity = 1, length_peak = 100, width = 5){
-  p <- stats::dnorm(seq(( - length_peak / 2) + 1, length_peak / 2), sd = length_peak / width)
+generate_peak <- function(intensity = 1, length_peak = 100, alpha = 3, xi = -2){
+  p <- sd::dsn(seq(-3, 3, length.out = length_peak), alpha = alpha, xi = xi)
   peak <- ((p - min(p)) / (max(p) - min(p))) * intensity
   return(peak)
 }
@@ -130,7 +209,7 @@ generate_peak <- function(intensity = 1, length_peak = 100, width = 5){
 #' @param start The position (index) in the signal where the peak will begin.
 #'
 #' @return The signal with the added peak.
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' signal <- rep(0, 150)
@@ -142,17 +221,3 @@ add_peak <- function(signal, peak, start){
   signal[(start) : (start + length_peak - 1)] <- signal[(start) : (start + length_peak - 1)] + peak
   return(signal)
 }
-
-
-
-synthetic_chromatogram<- function(){
-  peaks <- 104 * exp(0.4  * seq(0.5,7,by=0.5)) - 104
-  width <- seq(20,3,length.out=length(peaks))
-  chromatogram <- synthetic_signal(peaks = peaks,
-                                   length_out = 2000,
-                                   width = width,
-                                   baseline = NULL,
-                                   noise = NULL)
-  return(chromatogram)
-}
-
