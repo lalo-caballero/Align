@@ -1,12 +1,23 @@
 ---
-title: "Workflow_POW"
-output: rmarkdown::html_vignette
+title: "Workflow POW"
+output:
+  "BiocStyle::html_document":
+    dev: png
+  "BiocStyle::pdf_document":
+    latex_engine: lualatex
+    df_print: "kable"
+    dev: png
+package: Align
+author: "Align authors"
+date: "`r format(Sys.Date(), '%F')`"
+abstract: >
+  An introduction to the workflow to optimize and apply the POW algotithm to a
+  dataset
 vignette: >
   %\VignetteIndexEntry{Workflow_POW}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,6 +29,11 @@ knitr::opts_chunk$set(
 library(Align)
 library(ggplot2)
 library(BiocParallel)
+register(SnowParam(workers = 2, 
+                   progressbar =interactive() && 
+                     is.null(getOption("knitr.in.progress")), 
+                   exportglobals = FALSE), 
+         default = TRUE)
 ```
 
 ```{r}
@@ -57,7 +73,7 @@ W <- Matrix::Diagonal(x = v)
 
 ```{r}
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error_pow(X,y,W,fom,iv,lambdas)
+val<-compute_val_error(X,y,W,fom,iv,lambdas)
 e_ix <- val$e_ix
 ti_ix <- val$ti_ix
 opar = optimize_params_pow(n_samples, lambdas, ti_ix, e_ix);

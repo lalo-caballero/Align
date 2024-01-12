@@ -21,11 +21,17 @@ synthetic_chromatogram(
 
 \item{intensity}{average intensity of the peaks}
 
-\item{random_intensity}{random maximum value to add or subtract to the intensity}
+\item{random_intensity}{random maximum value to add or subtract to the
+intensity}
 
-\item{mov_peaks}{randomness of the peaks, the smaller it is the most each peak can move}
+\item{mov_peaks}{randomness of the peaks, the smaller it is the most each
+peak can move}
 
-\item{xi}{}
+\item{alpha}{for skewed normal distribution, modifies the first half of the
+peak}
+
+\item{xi}{for skewed normal distribution, moves the center of the
+distribution}
 }
 \value{
 a vector that contains a synthetic chromatogram

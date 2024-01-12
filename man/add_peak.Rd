@@ -19,9 +19,4 @@ The signal with the added peak.
 \description{
 Adds a peak to a signal in the desired place.
 }
-\examples{
-signal <- rep(0, 150)
-peak <- generate_peak()
-add_peak(signal = signal, peak = peak, start = 25)
-}
 \keyword{internal}

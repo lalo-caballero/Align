@@ -33,10 +33,7 @@ pow(
 \item{verbose}{by default 'FALSE'to privide information in the console}
 }
 \value{
-A 'list' with:
-w: Warping function
-sel: part of y that can be fitted
-rms: prediction error.
+warp
 }
 \description{
 Alignment with POW method.

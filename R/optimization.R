@@ -18,7 +18,7 @@
 compute_val_error <- function(X, y, W, fom, iv, lambdas, parallel = TRUE) {
   if (parallel){
     result_parallel <- BiocParallel::bplapply(X = as.list(data.frame(t(X))),
-                                              FUN = Align:::val,
+                                              FUN = val,
                                               y = y,
                                               W = W,
                                               fom = fom,

@@ -49,6 +49,7 @@ Generates a synthetic signal with peaks with normal distribution.
 \examples{
 synthetic_signal()
 synthetic_signal(peaks = 5)
-synthetic_signal(intensity = c(100, 600, 1000), baseline = seq(0, 150, by = 0.1))
+synthetic_signal(intensity = c(100, 600, 1000),
+                 baseline = seq(0, 150, by = 0.1))
 synthetic_signal(peaks = 10, length_out = 1500, noise = 10)
 }

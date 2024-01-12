@@ -11,19 +11,16 @@ generate_peak(intensity = 1, length_peak = 100, alpha = 3, xi = -2)
 
 \item{length_peak}{Length of the peak in indexes.}
 
-\item{alpha}{for skewed normal distribution, modifies the first half of the peak}
+\item{alpha}{for skewed normal distribution, modifies the first half of the
+peak}
 
-\item{xi}{for skewed normal distribution, moves the center of the distribution}
+\item{xi}{for skewed normal distribution, moves the center of the
+distribution}
 }
 \value{
 A vector with a peak.
 }
 \description{
 Generates a peak with normal distribution.
-}
-\examples{
-generate_peak()
-generate_peak(intensity = 500)
-generate_peak(length_peak = 150, alpha = 1)
 }
 \keyword{internal}

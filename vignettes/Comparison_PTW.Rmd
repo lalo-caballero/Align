@@ -1,8 +1,19 @@
 ---
-title: "Comparison_POW_PTW"
-output: html_document
+title: "Comparison with PTW"
+output:
+  "BiocStyle::html_document":
+    dev: png
+  "BiocStyle::pdf_document":
+    latex_engine: lualatex
+    df_print: "kable"
+    dev: png
+package: Align
+author: "Align authors"
+date: "`r format(Sys.Date(), '%F')`"
+abstract: >
+  A comparison with the technique PTW
 vignette: >
-  %\VignetteIndexEntry{Workflow_POW}
+  %\VignetteIndexEntry{Comparison_PTW}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,6 +28,12 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(Align)
 library(ggplot2)
+library(BiocParallel)
+register(SnowParam(workers = 2, 
+                   progressbar = interactive() && 
+                     is.null(getOption("knitr.in.progress")), 
+                   exportglobals = FALSE), 
+         default = TRUE)
 ```
 
 ```{r}
@@ -27,40 +44,37 @@ lambda2_max <- 8
 L <- 31
 ```
 
-```{r}
-library(GCIMS)
-library(BiocParallel)
-show_progress_bar <- interactive() && is.null(getOption("knitr.in.progress"))
-register(SnowParam(workers = parallel::detectCores()/2, progressbar = show_progress_bar, exportglobals = FALSE), default = TRUE)
-samples_directory<- "/storage/projects/TargetML/KETONES"
-annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
-dataset1 <- GCIMSDataset$new(
-  annotations,
-  base_dir = samples_directory,
-  on_ram = FALSE
-)
-filterRt(dataset1, rt = c(0, 1500)) # in s
-filterDt(dataset1, dt = c(5, 16)) # in ms
-dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
-decimate(dataset1, rt_factor = 1, dt_factor = 2)
-#dataset1 <- align_ip(dataset1)
-dataset1$realize()
-data <- dataset1$getRIC()
-data <- data[-c(26,27,32,34,36,37,38),]
+```{r load ketones}
+# library(GCIMS)
+# samples_directory<- "/storage/projects/TargetML/KETONES"
+# annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+# dataset1 <- GCIMSDataset$new(
+#   annotations,
+#   base_dir = samples_directory,
+#   on_ram = FALSE
+# )
+# filterRt(dataset1, rt = c(0, 1500)) # in s
+# filterDt(dataset1, dt = c(5, 16)) # in ms
+# dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
+# decimate(dataset1, rt_factor = 1, dt_factor = 2)
+# #dataset1 <- align_ip(dataset1)
+# dataset1$realize()
+# data <- dataset1$getRIC()
+# data <- data[-c(26,27,32,34,36,37,38),]
 ```
 
 
-```{r}
-# set.seed(151)
-# data <- create_synthetic_dataset(n_samples = 10,
-#                                  n_peaks = 10,
-#                                  length_out = 1500,
-#                                  mov_peaks = 5,
-#                                  intensity = 500,
-#                                  random_intensity = 50)
+```{r create synthetic dataset}
+set.seed(151)
+data <- create_synthetic_dataset(n_samples = 10,
+                                 n_peaks = 10,
+                                 length_out = 1500,
+                                 mov_peaks = 5,
+                                 intensity = 500,
+                                 random_intensity = 50)
 ```
 
-```{r}
+```{r optimization of parameters}
 idx_y <- select_reference(data)
 X <- as.matrix(data[-idx_y,])
 y <- as.matrix(data[idx_y,])
@@ -70,9 +84,6 @@ v <- rep(1,m)
 iv <- seq(2, m - 1, by = p)
 v[iv] <- 0
 W <- Matrix::Diagonal(x = v)
-```
-
-```{r}
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
 val<-compute_val_error(X,y,W,fom,iv,lambdas)
 e_ix <- val$e_ix
@@ -82,11 +93,12 @@ best_lambdas2 <- opar$best_params
 lambdas2_idx <- opar$params_idx
 ```
 
-```{r}
+
+```{r Apply}
 XW <- apply_pow(X, y, best_lambdas2)
 ```
 
-```{r}
+```{r function for optimization of PTW}
 optimize_polynomial_order <- function(ric_sample, ric_ref) {
   correction_type_options <- seq.int(0, 10)
   poly_orders <- seq.int(1, 10)
@@ -141,20 +153,20 @@ cowplot::plot_grid(a,b,c)
 ```
 
 ```{r}
-image(c(1:3729),c(1:30),t(XW),col=hcl.colors(10, "Grays"))
+image(c(1:m),c(1:nrow(XW)),t(XW),col=hcl.colors(10, "Grays"))
 ```
 
 ```{r}
-image(c(1:2511),c(1:31),t(data),col=hcl.colors(10, "Grays"))
+image(c(1:m),c(1:nrow(data)),t(data),col=hcl.colors(10, "Grays"))
 ```
 
 ```{r}
-image(c(1:2511),c(1:30),t(xp),col=hcl.colors(10, "Grays"))
+image(c(1:m),c(1:nrow(xp)),t(xp),col=hcl.colors(10, "Grays"))
 ```
 
 ```{r}
 dwp <- diff(wp)
-df_wp <- data.frame(t(wp))
+df_wp <- data.frame(t(dwp))
 df_wp <- cbind(df_wp,T=c(1:nrow(df_wp)))
 df_wp <- reshape2::melt(df_wp,"T")
 ggplot(data=df_wp, aes(x=T, y=value, col=variable))+geom_line()
@@ -165,5 +177,6 @@ df_align <- data.frame(cbind(t(XW),y))
 df_align <- cbind(df_align,T=c(1:nrow(df_align)))
 df_align <- reshape2::melt(df_align,"T")
 b<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+b
 ```
 

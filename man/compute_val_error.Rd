@@ -19,7 +19,7 @@ compute_val_error(X, y, W, fom, iv, lambdas, parallel = TRUE)
 
 \item{lambdas}{a vector with the penalties to test the POW.}
 
-\item{parallel}{Enable paralelization with BiocParallel}
+\item{parallel}{Enable parallelization with BiocParallel}
 }
 \value{
 a list with 2 values 'e_ix' and 'ti_ix'.
