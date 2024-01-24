@@ -4,7 +4,7 @@
 \alias{val}
 \title{Validation}
 \usage{
-val(X, y, W, fom, iv, lambdas)
+val(X, y, W, iv, lambdas, fom)
 }
 \arguments{
 \item{X}{Matrix with data to be aligned (one sample per row).}
@@ -13,11 +13,11 @@ val(X, y, W, fom, iv, lambdas)
 
 \item{W}{A matrix with of weights.}
 
-\item{fom}{figure of merit to use ('rms' or 'cor').}
-
 \item{iv}{indexes of the points used to validate.}
 
 \item{lambdas}{a vector with the penalties to test the POW.}
+
+\item{fom}{figure of merit to use ('rms' or 'cor').}
 }
 \value{
 list with e and i

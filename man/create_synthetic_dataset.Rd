@@ -9,26 +9,29 @@ create_synthetic_dataset(
   n_peaks,
   length_out,
   mov_peaks,
-  intensity,
-  random_intensity
+  intensity = 1000,
+  random_intensity = NULL
 )
 }
 \arguments{
-\item{n_samples}{a}
+\item{n_samples}{number of chromatograms to be generated}
 
-\item{n_peaks}{a}
+\item{n_peaks}{number of peaks in each chromatogram}
 
-\item{length_out}{a}
+\item{length_out}{length of chromatograms}
 
-\item{mov_peaks}{a}
+\item{mov_peaks}{random movement of the position of the peaks}
 
-\item{intensity}{a}
+\item{intensity}{intensity of the peaks}
 
-\item{random_intensity}{a}
+\item{random_intensity}{random variation for the intensity of the peaks}
 }
 \value{
 synthetic dataset.
 }
 \description{
 Create Synthetic dataset.
+}
+\examples{
+create_synthetic_dataset(10,10,1000,5)
 }

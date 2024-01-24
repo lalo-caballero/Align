@@ -15,15 +15,17 @@
 #'
 #' @examples
 
-compute_val_error <- function(X, y, W, fom, iv, lambdas, parallel = TRUE) {
+compute_val_error <- function(X, y, W, iv, lambdas,
+                              fom = 'rms',
+                              parallel = TRUE) {
   if (parallel){
     result_parallel <- BiocParallel::bplapply(X = as.list(data.frame(t(X))),
                                               FUN = val,
                                               y = y,
                                               W = W,
-                                              fom = fom,
                                               iv = iv,
-                                              lambdas = lambdas)
+                                              lambdas = lambdas,
+                                              fom = fom)
     e_ix <- t(as.data.frame(lapply(result_parallel, '[', 1)))
     ti_ix <- t(as.data.frame(lapply(result_parallel, '[', 2)))
     rownames(e_ix) <- NULL
@@ -32,7 +34,7 @@ compute_val_error <- function(X, y, W, fom, iv, lambdas, parallel = TRUE) {
     e_ix <- matrix(nrow = nrow(X), ncol = length(lambdas))
     ti_ix <- matrix(nrow = nrow(X), ncol = length(lambdas))
     for (i in 1:nrow(X)){
-      result_val <- val(X[i, ], y, W, fom, iv, lambdas)
+      result_val <- val(X[i, ], y, W, iv, lambdas, fom)
       e_ix[i, ] <- result_val$e
       ti_ix[i, ] <- result_val$ti
     }
@@ -49,7 +51,7 @@ compute_val_error <- function(X, y, W, fom, iv, lambdas, parallel = TRUE) {
 #'
 #' @examples
 
-val <- function(X, y, W, fom, iv, lambdas){
+val <- function(X, y, W, iv, lambdas, fom){
   e <- rep(0, length(lambdas))
   ti <- rep(0, length(lambdas))
   for (l in 1:length(lambdas)) {
@@ -87,7 +89,7 @@ val <- function(X, y, W, fom, iv, lambdas){
 #'
 #' @examples
 
-optimize_params_pow <- function(n_samples, params, ti_ix, e_ix) {
+optimize_params <- function(n_samples, params, ti_ix, e_ix) {
   params_ix <- matrix(rep(params, each = n_samples), nrow = n_samples, byrow = TRUE)
   e_ix[ti_ix == 1] <- NA
   params_ix[ti_ix == 1] <- NA

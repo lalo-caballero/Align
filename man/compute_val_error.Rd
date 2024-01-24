@@ -4,7 +4,7 @@
 \alias{compute_val_error}
 \title{Compute validation error.}
 \usage{
-compute_val_error(X, y, W, fom, iv, lambdas, parallel = TRUE)
+compute_val_error(X, y, W, iv, lambdas, fom = "rms", parallel = TRUE)
 }
 \arguments{
 \item{X}{Matrix with data to be aligned (one sample per row).}
@@ -13,11 +13,11 @@ compute_val_error(X, y, W, fom, iv, lambdas, parallel = TRUE)
 
 \item{W}{A matrix with of weights.}
 
-\item{fom}{figure of merit to use ('rms' or 'cor').}
-
 \item{iv}{indexes of the points used to validate.}
 
 \item{lambdas}{a vector with the penalties to test the POW.}
+
+\item{fom}{figure of merit to use ('rms' or 'cor').}
 
 \item{parallel}{Enable parallelization with BiocParallel}
 }

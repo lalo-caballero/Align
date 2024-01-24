@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 library(Align)
 library(ggplot2)
 library(BiocParallel)
-register(SnowParam(workers = 2, 
+register(SnowParam(workers = parallel::detectCores()/4, 
                    progressbar =interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
@@ -39,8 +39,8 @@ register(SnowParam(workers = 2,
 ```{r}
 fom <- 'rms'
 p <- 10
-lambda2_min <- -4
-lambda2_max <- 8
+lambda2_min <- -2
+lambda2_max <- 2
 L <- 31
 ```
 
@@ -49,14 +49,33 @@ L <- 31
 #data <- read.csv(samples_dir, header = FALSE)
 ```
 
+```{r load ketones}
+library(GCIMS)
+samples_directory<- "/storage/projects/TargetML/KETONES"
+annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+dataset1 <- GCIMSDataset$new(
+  annotations,
+  base_dir = samples_directory,
+  on_ram = FALSE
+)
+filterRt(dataset1, rt = c(0, 1500)) # in s
+filterDt(dataset1, dt = c(5, 16)) # in ms
+dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
+decimate(dataset1, rt_factor = 1, dt_factor = 2)
+align_ip(dataset1)
+dataset1$realize()
+data <- dataset1$getRIC()
+data <- data[-c(26,27,32,34,36,37,38),]
+```
+
 ```{r}
-set.seed(100)
-data <- create_synthetic_dataset(n_samples = 15,
-                                 n_peaks = 10,
-                                 length_out = 1500,
-                                 mov_peaks = 5,
-                                 intensity = 500,
-                                 random_intensity = 50)
+# set.seed(100)
+# data <- create_synthetic_dataset(n_samples = 15,
+#                                  n_peaks = 10,
+#                                  length_out = 1500,
+#                                  mov_peaks = 5,
+#                                  intensity = 500,
+#                                  random_intensity = 50)
 ```
 
 ```{r}
@@ -73,12 +92,12 @@ W <- Matrix::Diagonal(x = v)
 
 ```{r}
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error(X,y,W,fom,iv,lambdas)
+val<-compute_val_error(X,y,W,iv,lambdas,fom)
 e_ix <- val$e_ix
 ti_ix <- val$ti_ix
-opar = optimize_params_pow(n_samples, lambdas, ti_ix, e_ix);
+opar = optimize_params(n_samples, lambdas, ti_ix, e_ix)
 best_lambdas2 <- opar$best_params
-lambdas2_idx <- opar$params_idx
+#lambdas2_idx <- opar$params_idx
 ```
 
 ```{r}

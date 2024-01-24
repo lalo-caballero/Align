@@ -177,23 +177,24 @@ synthetic_chromatogram<- function(n_peaks,
 
 #' Create Synthetic dataset.
 #'
-#' @param n_samples a
-#' @param n_peaks a
-#' @param length_out a
-#' @param mov_peaks a
-#' @param intensity a
-#' @param random_intensity a
+#' @param n_samples number of chromatograms to be generated
+#' @param n_peaks number of peaks in each chromatogram
+#' @param length_out length of chromatograms
+#' @param mov_peaks random movement of the position of the peaks
+#' @param intensity intensity of the peaks
+#' @param random_intensity random variation for the intensity of the peaks
 #'
 #' @return synthetic dataset.
 #' @export
 #'
 #' @examples
+#' create_synthetic_dataset(10,10,1000,5)
 create_synthetic_dataset <- function(n_samples,
                                      n_peaks,
                                      length_out,
                                      mov_peaks,
-                                     intensity,
-                                     random_intensity){
+                                     intensity=1000,
+                                     random_intensity=NULL){
   dataset <- matrix(nrow = n_samples, ncol = length_out)
   for (i in 1:n_samples){
     dataset[i,] <- synthetic_chromatogram(n_peaks = n_peaks,
