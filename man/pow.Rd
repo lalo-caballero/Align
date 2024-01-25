@@ -6,8 +6,8 @@
 \usage{
 pow(
   x,
-  y,
   lambda2,
+  y,
   lambda1 = 10^6,
   W = NULL,
   max_it = 100,
@@ -18,9 +18,9 @@ pow(
 \arguments{
 \item{x}{Signal to fit.}
 
-\item{y}{Reference signal.}
-
 \item{lambda2}{Penalty for negative values of firsT derivative of warp}
+
+\item{y}{Reference signal.}
 
 \item{lambda1}{Regularization parameter for second derivative of warp}
 
@@ -46,5 +46,5 @@ POW like PTW but without a fix polynomial, it will work
 x <- c(1:10)
 y <- c(1:10)
 lambda2 <- 1
-pow(x, y,lambda2)
+pow(x, lambda2, y)
 }

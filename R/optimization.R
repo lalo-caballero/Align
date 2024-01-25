@@ -55,7 +55,7 @@ val <- function(X, y, W, iv, lambdas, fom){
   e <- rep(0, length(lambdas))
   ti <- rep(0, length(lambdas))
   for (l in 1:length(lambdas)) {
-    w <- pow(x = X, y = y, lambda2 = lambdas[l], W = W)
+    w <- pow(x = X, lambda2 = lambdas[l], y = y, W = W)
     diff_w <- diff(w)
     ti[l] <- any(diff_w < 0)
     interp <- interpolation(w, X)

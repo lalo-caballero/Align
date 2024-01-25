@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(Align)
+library(pows)
 library(ggplot2)
 library(BiocParallel)
 register(SnowParam(workers = parallel::detectCores()/4, 
@@ -95,7 +95,7 @@ best_lambdas2 <- opar$best_params
 
 
 ```{r Apply}
-XW <- apply_pow(X, y, best_lambdas2)
+XW <- apply_pow(X, best_lambdas2, y)
 ```
 
 ```{r function for optimization of PTW}

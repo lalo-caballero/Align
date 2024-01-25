@@ -4,14 +4,14 @@
 \alias{apply_pow}
 \title{Apply POW}
 \usage{
-apply_pow(X, y, lambdas, max_it = 1000)
+apply_pow(X, lambdas, y, max_it = 1000)
 }
 \arguments{
 \item{X}{A matrix with the samples to align}
 
-\item{y}{The reference signal}
-
 \item{lambdas}{the lambda to be used for the alignment of each sample}
+
+\item{y}{The reference signal}
 
 \item{max_it}{maximum iterations to be done in the POW alignment}
 }

@@ -22,9 +22,10 @@
 #'x <- c(1:10)
 #'y <- c(1:10)
 #'lambda2 <- 1
-#'pow(x, y,lambda2)
+#'pow(x, lambda2, y)
 
-pow <- function(x, y, lambda2, lambda1 = 10^6, W = NULL, max_it = 100, min_drms = 1e-6, verbose = FALSE) {
+pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms = 1e-6, verbose = FALSE) {
+  require(Matrix)
   m<-max(length(x),length(y))
   if (is.null(W)){
     W <- methods::as(methods::as(Matrix::Diagonal(m, 1), "generalMatrix"), "CsparseMatrix")
@@ -93,13 +94,12 @@ pow <- function(x, y, lambda2, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
 #' @export
 #'
 #' @examples
-apply_pow <- function(X, y, lambdas, max_it = 1000){
+apply_pow <- function(X, lambdas, y, max_it = 1000){
 
-  ### FIXME try mapply
   n_samples <- nrow(X)
   XW <- X * 0
   for (i in 1:n_samples){
-    w <- pow(X[i, ], y, lambdas[i], max_it = max_it)
+    w <- pow(X[i, ], lambdas[i], y, max_it = max_it)
     interp <- interpolation(w, X[i, ])
     xw <- interp$f
     sel <- interp$s

@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(Align)
+library(pow)
 library(ggplot2)
 library(BiocParallel)
 register(SnowParam(workers = parallel::detectCores()/4, 
@@ -40,7 +40,7 @@ register(SnowParam(workers = parallel::detectCores()/4,
 fom <- 'rms'
 p <- 10
 lambda2_min <- -2
-lambda2_max <- 2
+lambda2_max <- 4
 L <- 31
 ```
 
@@ -50,32 +50,32 @@ L <- 31
 ```
 
 ```{r load ketones}
-library(GCIMS)
-samples_directory<- "/storage/projects/TargetML/KETONES"
-annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
-dataset1 <- GCIMSDataset$new(
-  annotations,
-  base_dir = samples_directory,
-  on_ram = FALSE
-)
-filterRt(dataset1, rt = c(0, 1500)) # in s
-filterDt(dataset1, dt = c(5, 16)) # in ms
-dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
-decimate(dataset1, rt_factor = 1, dt_factor = 2)
-align_ip(dataset1)
-dataset1$realize()
-data <- dataset1$getRIC()
-data <- data[-c(26,27,32,34,36,37,38),]
+# library(GCIMS)
+# samples_directory<- "/storage/projects/TargetML/KETONES"
+# annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+# annotations <- annotations[-c(26,27,32,34,36,37,38),]
+# dataset1 <- GCIMSDataset$new(
+#   annotations,
+#   base_dir = samples_directory,
+#   on_ram = FALSE
+# )
+# filterRt(dataset1, rt = c(0, 1500)) # in s
+# filterDt(dataset1, dt = c(5, 16)) # in ms
+# dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
+# decimate(dataset1, rt_factor = 1, dt_factor = 2)
+# align_ip(dataset1)
+# dataset1$realize()
+# data <- dataset1$getRIC()
 ```
 
 ```{r}
-# set.seed(100)
-# data <- create_synthetic_dataset(n_samples = 15,
-#                                  n_peaks = 10,
-#                                  length_out = 1500,
-#                                  mov_peaks = 5,
-#                                  intensity = 500,
-#                                  random_intensity = 50)
+set.seed(100)
+data <- create_synthetic_dataset(n_samples = 15,
+                                 n_peaks = 10,
+                                 length_out = 1500,
+                                 mov_peaks = 5,
+                                 intensity = 500,
+                                 random_intensity = 50)
 ```
 
 ```{r}
@@ -101,28 +101,28 @@ best_lambdas2 <- opar$best_params
 ```
 
 ```{r}
-XW <- apply_pow(X, y, best_lambdas2)
+XW <- apply_pow(X, best_lambdas2, y)
 ```
 
 ```{r}
 df_align <- data.frame(t(XW))
 df_align <- cbind(df_align,T=c(1:nrow(df_align)))
 df_align <- reshape2::melt(df_align,"T")
-a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()
+a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
 
 df_pre_align <- data.frame(t(X))
 df_pre_align <- cbind(df_pre_align,T=c(1:nrow(df_pre_align)))
 df_pre_align <- reshape2::melt(df_pre_align,"T")
-b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()
+b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
 cowplot::plot_grid(a,b)
 ```
 
 ```{r}
-image(c(1:1500),c(1:14),t(XW),col=hcl.colors(10, "Grays"))
+image(c(1:m),c(1:n_samples),t(XW),col=hcl.colors(10, "Grays"))
 ```
 
 ```{r}
-image(c(1:1500),c(1:15),t(data),col=hcl.colors(10, "Grays"))
+image(c(1:m),c(1:(n_samples+1)),t(data),col=hcl.colors(10, "Grays"))
 ```
 
 
