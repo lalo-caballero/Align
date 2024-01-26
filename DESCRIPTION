@@ -1,9 +1,29 @@
 Package: pow
 Title: Parametric Optimized Warping
 Version: 0.0.0.9000
-Authors@R: 
-    person("Eduardo", "Caballero", , "ecaballero@ibecbarcelona.eu", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-9698-0749"))
+Authors@R: c(
+    person(
+      given = "Eduardo",
+      family = "Caballero",
+      email = "ecaballero@ibecbarcelona.eu",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-9698-0749")),
+    person(
+      given = "Luis",
+      family = "Fernandez",
+      email = "lfernandez@ibecbarcelona.eu",
+      role = "aut",
+      comment = c(ORCID = "0000-0001-9790-6287")),
+    person(
+      given = "Santiago",
+      family = "Marco Colás",
+      email = "smarco@ibecbarcelona.eu",
+      role = c("aut"),
+      comment = c(ORCID = "0000-0003-2663-2965")),
+    person(
+      given = "Institute for Bioengineering of Catalonia",
+      role = "cph")
+    )
 Description: Package for chromatogram alignment with POW algorithm (Fernandez, ND).
 License: MIT + file LICENSE
 Encoding: UTF-8

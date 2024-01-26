@@ -7,8 +7,8 @@ output:
     latex_engine: lualatex
     df_print: "kable"
     dev: png
-package: Align
-author: "Align authors"
+package: pow
+author: "pow authors"
 date: "`r format(Sys.Date(), '%F')`"
 abstract: >
   An introduction to the workflow to optimize and apply the POW algotithm to a
@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 library(pow)
 library(ggplot2)
 library(BiocParallel)
-register(SnowParam(workers = parallel::detectCores()/4, 
+register(SnowParam(workers = 2, 
                    progressbar =interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
@@ -37,7 +37,6 @@ register(SnowParam(workers = parallel::detectCores()/4,
 ```
 
 ```{r}
-fom <- 'rms'
 p <- 10
 lambda2_min <- -2
 lambda2_max <- 4
@@ -92,7 +91,7 @@ W <- Matrix::Diagonal(x = v)
 
 ```{r}
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error(X,y,W,iv,lambdas,fom)
+val<-compute_val_error(X,y,W,iv,lambdas)
 e_ix <- val$e_ix
 ti_ix <- val$ti_ix
 opar = optimize_params(n_samples, lambdas, ti_ix, e_ix)

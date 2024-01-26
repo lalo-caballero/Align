@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(Align)
+library(pow)
 
-test_check("Align")
+test_check("pow")

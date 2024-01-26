@@ -25,7 +25,6 @@
 #'pow(x, lambda2, y)
 
 pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms = 1e-6, verbose = FALSE) {
-  require(Matrix)
   m<-max(length(x),length(y))
   if (is.null(W)){
     W <- methods::as(methods::as(Matrix::Diagonal(m, 1), "generalMatrix"), "CsparseMatrix")
@@ -92,8 +91,7 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
 #' warped_samples
 #' warps
 #' @export
-#'
-#' @examples
+
 apply_pow <- function(X, lambdas, y, max_it = 1000){
 
   n_samples <- nrow(X)

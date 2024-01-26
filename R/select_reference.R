@@ -5,8 +5,6 @@
 #'
 #' @return index of best reference sample
 #' @export
-#'
-#' @examples
 
 select_reference <- function(data, figure = 'correlation') {
   data <- as.matrix(data)

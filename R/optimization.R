@@ -12,8 +12,6 @@
 #'
 #' @return a list with 2 values 'e_ix' and 'ti_ix'.
 #' @export
-#'
-#' @examples
 
 compute_val_error <- function(X, y, W, iv, lambdas,
                               fom = 'rms',
@@ -48,8 +46,6 @@ compute_val_error <- function(X, y, W, iv, lambdas,
 #'
 #' @return list with e and i
 #' @keywords internal
-#'
-#' @examples
 
 val <- function(X, y, W, iv, lambdas, fom){
   e <- rep(0, length(lambdas))
@@ -86,8 +82,6 @@ val <- function(X, y, W, iv, lambdas, fom){
 #'
 #' @return a list with two values best_params and params_ix
 #' @export
-#'
-#' @examples
 
 optimize_params <- function(n_samples, params, ti_ix, e_ix) {
   params_ix <- matrix(rep(params, each = n_samples), nrow = n_samples, byrow = TRUE)

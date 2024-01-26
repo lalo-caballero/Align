@@ -137,8 +137,6 @@ synthetic_signal <- function(peaks = 2,
 #'
 #' @return a vector that contains a synthetic chromatogram
 #' @export
-#'
-#' @examples
 
 synthetic_chromatogram<- function(n_peaks,
                                   length_out = 2000,

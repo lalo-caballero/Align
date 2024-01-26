@@ -7,8 +7,8 @@ output:
     latex_engine: lualatex
     df_print: "kable"
     dev: png
-package: Align
-author: "Align authors"
+package: pow
+author: "pow authors"
 date: "`r format(Sys.Date(), '%F')`"
 abstract: >
   A comparison with the technique PTW
@@ -26,10 +26,10 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(pows)
+library(pow)
 library(ggplot2)
 library(BiocParallel)
-register(SnowParam(workers = parallel::detectCores()/4, 
+register(SnowParam(workers = 2, 
                    progressbar = interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
@@ -37,41 +37,40 @@ register(SnowParam(workers = parallel::detectCores()/4,
 ```
 
 ```{r}
-fom <- 'rms'
 p <- 10
-lambda2_min <- -4
-lambda2_max <- 8
+lambda2_min <- -2
+lambda2_max <- 4
 L <- 31
 ```
 
 ```{r load ketones}
-library(GCIMS)
-samples_directory<- "/storage/projects/TargetML/KETONES"
-annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
-dataset1 <- GCIMSDataset$new(
-  annotations,
-  base_dir = samples_directory,
-  on_ram = FALSE
-)
-filterRt(dataset1, rt = c(0, 1500)) # in s
-filterDt(dataset1, dt = c(5, 16)) # in ms
-dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
-decimate(dataset1, rt_factor = 1, dt_factor = 2)
-align_ip(dataset1)
-dataset1$realize()
-data <- dataset1$getRIC()
-data <- data[-c(26,27,32,34,36,37,38),]
+# library(GCIMS)
+# samples_directory<- "/storage/projects/TargetML/KETONES"
+# annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+# annotations <- annotations[-c(26,27,32,34,36,37,38),] 
+# dataset1 <- GCIMSDataset$new(
+#   annotations,
+#   base_dir = samples_directory,
+#   on_ram = FALSE
+# )
+# filterRt(dataset1, rt = c(0, 1500)) # in s
+# filterDt(dataset1, dt = c(5, 16)) # in ms
+# dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
+# decimate(dataset1, rt_factor = 1, dt_factor = 2)
+# align_ip(dataset1)
+# dataset1$realize()
+# data <- dataset1$getRIC()
 ```
 
 
 ```{r create synthetic dataset}
-# set.seed(151)
-# data <- create_synthetic_dataset(n_samples = 10,
-#                                  n_peaks = 10,
-#                                  length_out = 1500,
-#                                  mov_peaks = 5,
-#                                  intensity = 500,
-#                                  random_intensity = 50)
+set.seed(2424)
+data <- create_synthetic_dataset(n_samples = 10,
+                                 n_peaks = 10,
+                                 length_out = 1500,
+                                 mov_peaks = 5,
+                                 intensity = 500,
+                                 random_intensity = 50)
 ```
 
 ```{r optimization of parameters}
@@ -85,7 +84,7 @@ iv <- seq(2, m - 1, by = p)
 v[iv] <- 0
 W <- Matrix::Diagonal(x = v)
 lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error(X,y,W,iv,lambdas,fom)
+val<-compute_val_error(X,y,W,iv,lambdas)
 e_ix <- val$e_ix
 ti_ix <- val$ti_ix
 opar = optimize_params(n_samples, lambdas, ti_ix, e_ix)
