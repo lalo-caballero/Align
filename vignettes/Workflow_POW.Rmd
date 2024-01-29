@@ -37,13 +37,6 @@ register(SnowParam(workers = 2,
 ```
 
 ```{r}
-p <- 10
-lambda2_min <- -2
-lambda2_max <- 4
-L <- 31
-```
-
-```{r}
 #samples_dir <- "/storage/projects/Alignment/data_to_test_nptw/gaschrom/data_gaschrom.csv"
 #data <- read.csv(samples_dir, header = FALSE)
 ```
@@ -79,24 +72,21 @@ data <- create_synthetic_dataset(n_samples = 15,
 
 ```{r}
 idx_y <- select_reference(data)
-X <- as.matrix(data[-idx_y,])
-y <- as.matrix(data[idx_y,])
+X <- as.matrix(data[-idx_y, ])
+y <- as.matrix(data[idx_y, ])
 n_samples <- nrow(X)
 m <- length(y)
-v <- rep(1,m)
-iv <- seq(2, m - 1, by = p)
+v <- rep(1, m)
+iv <- seq(2, m - 1, by = 10)
 v[iv] <- 0
 W <- Matrix::Diagonal(x = v)
 ```
 
 ```{r}
-lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error(X,y,W,iv,lambdas)
-e_ix <- val$e_ix
-ti_ix <- val$ti_ix
-opar = optimize_params(n_samples, lambdas, ti_ix, e_ix)
+lambdas <- pracma::logspace(-2, 4, 10)
+val<-compute_val_error(X, y, W, iv, lambdas)
+opar = optimize_params(n_samples, lambdas, val$ti_ix, val$e_ix)
 best_lambdas2 <- opar$best_params
-#lambdas2_idx <- opar$params_idx
 ```
 
 ```{r}
@@ -104,24 +94,43 @@ XW <- apply_pow(X, best_lambdas2, y)
 ```
 
 ```{r}
-df_align <- data.frame(t(XW))
-df_align <- cbind(df_align,T=c(1:nrow(df_align)))
-df_align <- reshape2::melt(df_align,"T")
-a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+df_raw <- data.frame(t(X))
+df_raw <- cbind(df_raw ,Time = c(1:nrow(df_raw)))
+df_raw <- reshape2::melt(df_raw, "Time")
+raw_data <- ggplot(data = df_raw, aes(x = Time, y = value, col = variable)) +
+  geom_line() +
+  ylab("Intensity") +
+  guides(colour = "none")
 
-df_pre_align <- data.frame(t(X))
-df_pre_align <- cbind(df_pre_align,T=c(1:nrow(df_pre_align)))
-df_pre_align <- reshape2::melt(df_pre_align,"T")
-b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
-cowplot::plot_grid(a,b)
+df_pow <- data.frame(t(XW))
+df_pow <- cbind(df_pow,Time = c(1:nrow(df_pow)))
+df_pow <- reshape2::melt(df_pow, "Time")
+pow_data <- ggplot(data = df_pow, aes(x = Time, y = value, col = variable)) + 
+  geom_line() +
+  ylab("Intensity") +
+  guides(colour = "none")
+
+cowplot::plot_grid(raw_data,pow_data)
 ```
 
 ```{r}
-image(c(1:m),c(1:n_samples),t(XW),col=hcl.colors(10, "Grays"))
+image(c(1:m), 
+      c(1:nrow(XW)), 
+      t(XW), 
+      col = hcl.colors(10, "Grays"),  
+      xlab = "Time", 
+      ylab = "Sample") + 
+  title("Image of aligned Spectra with POW")
 ```
 
 ```{r}
-image(c(1:m),c(1:(n_samples+1)),t(data),col=hcl.colors(10, "Grays"))
+image(c(1:m), 
+      c(1:nrow(X)), 
+      t(X), 
+      col = hcl.colors(10, "Grays"),  
+      xlab = "Time", 
+      ylab = "Sample") + 
+  title("Image of Raw Samples")
 ```
 
 

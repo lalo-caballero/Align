@@ -29,74 +29,85 @@ knitr::opts_chunk$set(
 library(pow)
 library(ggplot2)
 library(BiocParallel)
-register(SnowParam(workers = 2, 
+library(GCIMS)
+register(SnowParam(workers = parallel::detectCores()/2, 
                    progressbar = interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
          default = TRUE)
 ```
 
-```{r}
-p <- 10
-lambda2_min <- -2
-lambda2_max <- 4
-L <- 31
+This vingette compares the PTW algorithm proposed by Eilers (2004), with the POW algorithm proposed by Férnandez (N.D.)
+```{r create synthetic dataset}
+# set.seed(2424)
+# data <- create_synthetic_dataset(n_samples = 10,
+#                                  n_peaks = 10,
+#                                  length_out = 1500,
+#                                  mov_peaks = 5,
+#                                  intensity = 500,
+#                                  random_intensity = 50)
 ```
 
-```{r load ketones}
-# library(GCIMS)
-# samples_directory<- "/storage/projects/TargetML/KETONES"
-# annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
-# annotations <- annotations[-c(26,27,32,34,36,37,38),] 
-# dataset1 <- GCIMSDataset$new(
-#   annotations,
-#   base_dir = samples_directory,
-#   on_ram = FALSE
+```{r create synthetic dataset}
+# samples_directory <- "ketones"
+# dir.create(samples_directory, recursive = TRUE, showWarnings = FALSE)
+# url <- "https://zenodo.org/record/7941230/files/AnalyticalStandards.zip?download=1"
+# tmp_zipfile <- tempfile(fileext=".zip")
+# curl::curl_download(url, tmp_zipfile)
+# utils::unzip(
+#   tmp_zipfile,
+#   junkpaths = TRUE, exdir = samples_directory
 # )
-# filterRt(dataset1, rt = c(0, 1500)) # in s
-# filterDt(dataset1, dt = c(5, 16)) # in ms
-# dataset1 <- smooth(dataset1, rt_length_s = 3, dt_length_ms = 0.14)
-# decimate(dataset1, rt_factor = 1, dt_factor = 2)
-# align_ip(dataset1)
-# dataset1$realize()
-# data <- dataset1$getRIC()
+# annotations <- create_annotations_table(samples_directory)
+```
+
+```{r}
+samples_directory<- "/storage/projects/TargetML/KETONES"
+annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+annotations <- annotations[-c(26,27,32,34,36,37,38),]
 ```
 
 
 ```{r create synthetic dataset}
-set.seed(2424)
-data <- create_synthetic_dataset(n_samples = 10,
-                                 n_peaks = 10,
-                                 length_out = 1500,
-                                 mov_peaks = 5,
-                                 intensity = 500,
-                                 random_intensity = 50)
+dataset <- GCIMSDataset$new(
+  annotations,
+  base_dir = samples_directory,
+  on_ram = FALSE 
+)
+filterRt(dataset, rt = c(0, 1100)) # in s
+filterDt(dataset, dt = c(5, 16)) # in ms
+dataset1 <- smooth(dataset, rt_length_s = 3, dt_length_ms = 0.14)
+decimate(dataset, rt_factor = 1, dt_factor = 2)
+align_ip(dataset)
+dataset$realize()
+data <- dataset$getRIC()
 ```
 
+For the POW algorithm we have to optimize the 'lambda2' and select the best reference sample:
 ```{r optimization of parameters}
+#First we select the best reference
 idx_y <- select_reference(data)
-X <- as.matrix(data[-idx_y,])
-y <- as.matrix(data[idx_y,])
+#We separate the dataset in the reference sample and the samples to align
+X <- as.matrix(data[-idx_y, ])
+y <- as.matrix(data[idx_y, ])
+#Then we optimize the lambda_2 
 n_samples <- nrow(X)
 m <- length(y)
-v <- rep(1,m)
-iv <- seq(2, m - 1, by = p)
+v <- rep(1, m)
+iv <- seq(2, m - 1, by = 10)
 v[iv] <- 0
 W <- Matrix::Diagonal(x = v)
-lambdas <- pracma::logspace(lambda2_min,lambda2_max,L)
-val<-compute_val_error(X,y,W,iv,lambdas)
-e_ix <- val$e_ix
-ti_ix <- val$ti_ix
-opar = optimize_params(n_samples, lambdas, ti_ix, e_ix)
+lambdas <- pracma::logspace(-2, 4, 31)
+val<-compute_val_error(X, y, W, iv, lambdas)
+opar = optimize_params(n_samples, lambdas, val$ti_ix, val$e_ix)
 best_lambdas2 <- opar$best_params
-#lambdas2_idx <- opar$params_idx
 ```
 
-
+Once we have the best reference and the best lambda_2 for each sample we apply the algorithm
 ```{r Apply}
 XW <- apply_pow(X, best_lambdas2, y)
 ```
-
+To use PTW you have to optimize the order of the polynomials
 ```{r function for optimization of PTW}
 optimize_polynomial_order <- function(ric_sample, ric_ref) {
   correction_type_options <- seq.int(0, 10)
@@ -117,6 +128,7 @@ optimize_polynomial_order <- function(ric_sample, ric_ref) {
 }
 ```
 
+Then we apply the PTW algorithm:
 ```{r}
 xp<-XW*0
 wp<-XW*0
@@ -132,35 +144,64 @@ for (i in 1:(nrow(xp))){
 }
 ```
 
+In here we can see the the comparison, first we see the raw samples, then the samples aligned using the POW algorithm and finally with the PTW alignment
 ```{r}
-df_align <- data.frame(t(XW))
-df_align <- cbind(df_align,T=c(1:nrow(df_align)))
-df_align <- reshape2::melt(df_align,"T")
-a<-ggplot(data=df_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+df_raw <- data.frame(t(X))
+df_raw <- cbind(df_raw ,Time = c(1:nrow(df_raw)))
+df_raw <- reshape2::melt(df_raw, "Time")
+raw_data <- ggplot(data = df_raw, aes(x = Time, y = value, col = variable)) +
+  geom_line() +
+  ylab("Intensity") +
+  guides(colour = "none")
 
-df_pre_align <- data.frame(t(X))
-df_pre_align <- cbind(df_pre_align,T=c(1:nrow(df_pre_align)))
-df_pre_align <- reshape2::melt(df_pre_align,"T")
-b<-ggplot(data=df_pre_align, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+df_pow <- data.frame(t(XW))
+df_pow <- cbind(df_pow,Time = c(1:nrow(df_pow)))
+df_pow <- reshape2::melt(df_pow, "Time")
+pow_data <- ggplot(data = df_pow, aes(x = Time, y = value, col = variable)) + 
+  geom_line() +
+  ylab("Intensity") +
+  guides(colour = "none")
+
+
 
 df_ptw <- data.frame(t(xp))
-df_ptw <- cbind(df_ptw,T=c(1:nrow(df_ptw)))
-df_ptw <- reshape2::melt(df_ptw,"T")
-c<-ggplot(data=df_ptw, aes(x=T, y=value, col=variable))+geom_line()+guides(colour="none")
+df_ptw <- cbind(df_ptw, Time = c(1:nrow(df_ptw)))
+df_ptw <- reshape2::melt(df_ptw, "Time")
+ptw_data <- ggplot(data = df_ptw, aes(x = Time, y = value, col = variable)) +
+  geom_line() +
+  ylab("Intensity") +
+  guides(colour="none")
 
-cowplot::plot_grid(a,b,c)
+cowplot::plot_grid(raw_data,pow_data,ptw_data)
+```
+```{r}
+image(c(1:m), 
+      c(1:nrow(X)), 
+      t(X), 
+      col = hcl.colors(10, "Grays"),  
+      xlab = "Time", 
+      ylab = "Sample") + 
+  title("Image of Raw Samples")
 ```
 
 ```{r}
-image(c(1:m),c(1:nrow(XW)),t(XW),col=hcl.colors(10, "Grays"))
+image(c(1:m), 
+      c(1:nrow(XW)), 
+      t(XW), 
+      col = hcl.colors(10, "Grays"),  
+      xlab = "Time", 
+      ylab = "Sample") + 
+  title("Image of aligned Spectra with POW")
 ```
 
 ```{r}
-image(c(1:m),c(1:nrow(data)),t(data),col=hcl.colors(10, "Grays"))
-```
-
-```{r}
-image(c(1:m),c(1:nrow(xp)),t(xp),col=hcl.colors(10, "Grays"))
+image(c(1:m), 
+      c(1:nrow(xp)), 
+      t(xp), 
+      col = hcl.colors(10, "Grays"),  
+      xlab = "Time", 
+      ylab = "Sample") + 
+  title("Image of aligned Spectra with PTW")
 ```
 
 ```{r}

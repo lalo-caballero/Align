@@ -1,5 +1,5 @@
 Package: pow
-Title: Parametric Optimized Warping
+Title: Penalized Optimized Warping
 Version: 0.0.0.9000
 Authors@R: c(
     person(
