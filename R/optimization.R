@@ -76,19 +76,29 @@ val <- function(X, y, W, iv, lambdas, fom){
 #' Optimize parameters POW
 #'
 #' @param n_samples number of samples or signals to be used
-#' @param params parameters
+#' @param lambdas lambdas tested
 #' @param ti_ix matrix with time inversions
 #' @param e_ix error matrix
 #'
 #' @return a list with two values best_params and params_ix
 #' @export
 
-optimize_params <- function(n_samples, params, ti_ix, e_ix) {
-  params_ix <- matrix(rep(params, each = n_samples), nrow = n_samples, byrow = TRUE)
+optimize_params <- function(n_samples, lambdas, ti_ix, e_ix) {
+  params_ix <- matrix(rep(lambdas, each = n_samples),
+                      nrow = n_samples,
+                      byrow = FALSE)
   e_ix[ti_ix == 1] <- NA
   params_ix[ti_ix == 1] <- NA
+  if (anyNA(e_ix[,length(lambdas)])){
+    ti_lambdas<-which(is.na(e_ix[,length(lambdas)]))
+    warning(paste("All lambdas have time inversion for samples:",
+                  ti_lambdas, "
+                  Maximum lambda will be used for that sample.
+                  Consider changing range of lambdas."))
+    e_ix[ti_lambdas,length(lambdas)] <- 1
+  }
   pos_e_ix <- apply(e_ix, 1, which.min)
-  best_params <- params[pos_e_ix]
+  best_params <- lambdas[pos_e_ix]
 
   return(list(best_params = best_params, params_ix = params_ix))
 }

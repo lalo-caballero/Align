@@ -4,12 +4,12 @@
 \alias{optimize_params}
 \title{Optimize parameters POW}
 \usage{
-optimize_params(n_samples, params, ti_ix, e_ix)
+optimize_params(n_samples, lambdas, ti_ix, e_ix)
 }
 \arguments{
 \item{n_samples}{number of samples or signals to be used}
 
-\item{params}{parameters}
+\item{lambdas}{lambdas tested}
 
 \item{ti_ix}{matrix with time inversions}
 

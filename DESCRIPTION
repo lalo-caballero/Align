@@ -42,8 +42,8 @@ Suggests:
     sn,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://github.com/lalo-caballero/pow
-BugReports: https://github.com/lalo-caballero/pow/issues
+URL: https://github.com/sipss/pow
+BugReports: https://github.com/sipss/pow/issues
 Imports: 
     Matrix,
     methods,

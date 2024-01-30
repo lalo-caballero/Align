@@ -83,7 +83,7 @@ W <- Matrix::Diagonal(x = v)
 ```
 
 ```{r}
-lambdas <- pracma::logspace(-2, 4, 10)
+lambdas <- pracma::logspace(-2, 4, 31)
 val<-compute_val_error(X, y, W, iv, lambdas)
 opar = optimize_params(n_samples, lambdas, val$ti_ix, val$e_ix)
 best_lambdas2 <- opar$best_params

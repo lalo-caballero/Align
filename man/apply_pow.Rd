@@ -4,7 +4,7 @@
 \alias{apply_pow}
 \title{Apply POW}
 \usage{
-apply_pow(X, lambdas, y, max_it = 1000)
+apply_pow(X, lambdas, y, max_it = 1000, return_warps = FALSE)
 }
 \arguments{
 \item{X}{A matrix with the samples to align}
@@ -14,11 +14,14 @@ apply_pow(X, lambdas, y, max_it = 1000)
 \item{y}{The reference signal}
 
 \item{max_it}{maximum iterations to be done in the POW alignment}
+
+\item{return_warps}{if TRUE it returns a list with warped samples and warps}
 }
 \value{
-a list with:
-warped_samples
-warps
+can be either a list with:
+samples = a matrix with the warped samples
+w = the warps applied to each sample
+or only the matrix with the warped samples
 }
 \description{
 Apply POW

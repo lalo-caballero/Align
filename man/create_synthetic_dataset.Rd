@@ -33,5 +33,9 @@ synthetic dataset.
 Create Synthetic dataset.
 }
 \examples{
-create_synthetic_dataset(10,10,1000,5)
+create_synthetic_dataset(10, 10, 1000, 5)
+create_synthetic_dataset(n_samples = 20,
+                         n_peaks = 7,
+                         length_out = 100,
+                         mov_peaks = 10)
 }

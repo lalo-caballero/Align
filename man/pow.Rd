@@ -42,9 +42,12 @@ Alignment with POW method.
 POW like PTW but without a fix polynomial, it will work
 }
 \examples{
-
-x <- c(1:10)
-y <- c(1:10)
+x <- synthetic_chromatogram(n_peaks = 7,
+                            intensity = 100,
+                            mov_peaks = 5)
+y <- synthetic_chromatogram(n_peaks = 7,
+                            intensity = 100,
+                            mov_peaks = 5)
 lambda2 <- 1
 pow(x, lambda2, y)
 }

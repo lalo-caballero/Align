@@ -18,9 +18,12 @@
 #' @export
 #'
 #' @examples
-#'
-#'x <- c(1:10)
-#'y <- c(1:10)
+#' x <- synthetic_chromatogram(n_peaks = 7,
+#'                             intensity = 100,
+#'                             mov_peaks = 5)
+#' y <- synthetic_chromatogram(n_peaks = 7,
+#'                             intensity = 100,
+#'                             mov_peaks = 5)
 #'lambda2 <- 1
 #'pow(x, lambda2, y)
 
@@ -86,16 +89,20 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
 #' @param y The reference signal
 #' @param lambdas the lambda to be used for the alignment of each sample
 #' @param max_it maximum iterations to be done in the POW alignment
+#' @param return_warps if TRUE it returns a list with warped samples and warps
 #'
-#' @return a list with:
-#' warped_samples
-#' warps
+#' @return can be either a list with:
+#' samples = a matrix with the warped samples
+#' w = the warps applied to each sample
+#' or only the matrix with the warped samples
+#'
 #' @export
 
-apply_pow <- function(X, lambdas, y, max_it = 1000){
+apply_pow <- function(X, lambdas, y, max_it = 1000, return_warps = FALSE){
 
   n_samples <- nrow(X)
   XW <- X * 0
+  W <- list()
   for (i in 1:n_samples){
     w <- pow(X[i, ], lambdas[i], y, max_it = max_it)
     interp <- interpolation(w, X[i, ])
@@ -103,6 +110,11 @@ apply_pow <- function(X, lambdas, y, max_it = 1000){
     sel <- interp$s
     XW[i,sel] <- xw
     XW[i,-sel] <- NA
+    W[[i]] <- w
   }
-  return (XW)
+  if (return_warps){
+    return(list(samples = XW, w = W))
+  } else{
+    return (XW)
+  }
 }

@@ -29,8 +29,8 @@ knitr::opts_chunk$set(
 library(pow)
 library(ggplot2)
 library(BiocParallel)
-library(GCIMS)
-register(SnowParam(workers = parallel::detectCores()/2, 
+#library(GCIMS)
+register(SnowParam(workers = 2, 
                    progressbar = interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
@@ -39,16 +39,16 @@ register(SnowParam(workers = parallel::detectCores()/2,
 
 This vingette compares the PTW algorithm proposed by Eilers (2004), with the POW algorithm proposed by Férnandez (N.D.)
 ```{r create synthetic dataset}
-# set.seed(2424)
-# data <- create_synthetic_dataset(n_samples = 10,
-#                                  n_peaks = 10,
-#                                  length_out = 1500,
-#                                  mov_peaks = 5,
-#                                  intensity = 500,
-#                                  random_intensity = 50)
+set.seed(2424)
+data <- create_synthetic_dataset(n_samples = 10,
+                                 n_peaks = 10,
+                                 length_out = 1500,
+                                 mov_peaks = 5,
+                                 intensity = 500,
+                                 random_intensity = 50)
 ```
 
-```{r create synthetic dataset}
+```{r use samples from zenodo}
 # samples_directory <- "ketones"
 # dir.create(samples_directory, recursive = TRUE, showWarnings = FALSE)
 # url <- "https://zenodo.org/record/7941230/files/AnalyticalStandards.zip?download=1"
@@ -62,25 +62,25 @@ This vingette compares the PTW algorithm proposed by Eilers (2004), with the POW
 ```
 
 ```{r}
-samples_directory<- "/storage/projects/TargetML/KETONES"
-annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
-annotations <- annotations[-c(26,27,32,34,36,37,38),]
+# samples_directory<- "/storage/projects/TargetML/KETONES"
+# annotations <- read.csv(file.path(samples_directory,"annotations.csv"))
+# annotations <- annotations[-c(26,27,32,34,36,37,38),]
 ```
 
 
-```{r create synthetic dataset}
-dataset <- GCIMSDataset$new(
-  annotations,
-  base_dir = samples_directory,
-  on_ram = FALSE 
-)
-filterRt(dataset, rt = c(0, 1100)) # in s
-filterDt(dataset, dt = c(5, 16)) # in ms
-dataset1 <- smooth(dataset, rt_length_s = 3, dt_length_ms = 0.14)
-decimate(dataset, rt_factor = 1, dt_factor = 2)
-align_ip(dataset)
-dataset$realize()
-data <- dataset$getRIC()
+```{r load dataset with GCIMS}
+# dataset <- GCIMSDataset$new(
+#   annotations,
+#   base_dir = samples_directory,
+#   on_ram = FALSE 
+# )
+# filterRt(dataset, rt = c(0, 1100)) # in s
+# filterDt(dataset, dt = c(5, 16)) # in ms
+# dataset1 <- smooth(dataset, rt_length_s = 3, dt_length_ms = 0.14)
+# decimate(dataset, rt_factor = 1, dt_factor = 2)
+# align_ip(dataset)
+# dataset$realize()
+# data <- dataset$getRIC()
 ```
 
 For the POW algorithm we have to optimize the 'lambda2' and select the best reference sample:
@@ -105,7 +105,9 @@ best_lambdas2 <- opar$best_params
 
 Once we have the best reference and the best lambda_2 for each sample we apply the algorithm
 ```{r Apply}
-XW <- apply_pow(X, best_lambdas2, y)
+P <- apply_pow(X, best_lambdas2, y, return_warps = TRUE)
+XW <- P$samples
+warps <- P$w
 ```
 To use PTW you have to optimize the order of the polynomials
 ```{r function for optimization of PTW}

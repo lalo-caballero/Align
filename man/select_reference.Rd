@@ -17,3 +17,10 @@ index of best reference sample
 \description{
 Select reference sample
 }
+\examples{
+data <- create_synthetic_dataset(n_samples = 10,
+                                 n_peaks = 7,
+                                 length_out = 100,
+                                 mov_peaks = 5)
+select_reference(data)
+}

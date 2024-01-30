@@ -29,7 +29,7 @@
 #'                  baseline = seq(0, 150, by = 0.1))
 #' synthetic_signal(peaks = 10, length_out = 1500, noise = 10)
 
-synthetic_signal <- function(peaks = 2,
+synthetic_signal <- function(peaks = 3,
                              length_out = 1000,
                              intensity = 1000,
                              alpha= 0,
@@ -137,6 +137,12 @@ synthetic_signal <- function(peaks = 2,
 #'
 #' @return a vector that contains a synthetic chromatogram
 #' @export
+#'
+#' @examples
+#' synthetic_chromatogram(10)
+#' synthetic_chromatogram(n_peaks = 7,
+#'                        intensity = 100,
+#'                        mov_peaks = 5)
 
 synthetic_chromatogram<- function(n_peaks,
                                   length_out = 2000,
@@ -186,7 +192,11 @@ synthetic_chromatogram<- function(n_peaks,
 #' @export
 #'
 #' @examples
-#' create_synthetic_dataset(10,10,1000,5)
+#' create_synthetic_dataset(10, 10, 1000, 5)
+#' create_synthetic_dataset(n_samples = 20,
+#'                          n_peaks = 7,
+#'                          length_out = 100,
+#'                          mov_peaks = 10)
 create_synthetic_dataset <- function(n_samples,
                                      n_peaks,
                                      length_out,

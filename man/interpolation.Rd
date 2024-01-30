@@ -24,7 +24,7 @@ or the warped x
 Interpolates a vector.
 }
 \examples{
-w <- c(1:10)
-x <- c(1:10)
-interpolation(w,x)
+w <- c(10:700)
+x <- synthetic_signal()
+interpolation(w, x)
 }

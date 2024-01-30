@@ -39,3 +39,9 @@ a vector that contains a synthetic chromatogram
 \description{
 Creates a synthetic chromatogram.
 }
+\examples{
+synthetic_chromatogram(10)
+synthetic_chromatogram(n_peaks = 7,
+                       intensity = 100,
+                       mov_peaks = 5)
+}
