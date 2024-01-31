@@ -10,7 +10,7 @@
 #' a peak.
 #' @param alpha For the shape of each peak, if a vector each value will
 #' correspond to a peak, changes the shape to the first half of each peak
-#' @param xi For the shape of each peak, if a vector each value will
+#' @param omega For the shape of each peak, if a vector each value will
 #' correspond to a peak, changes the center of the peak
 #' @param length_peaks The length of each peak (in indexes), if a scalar all
 #' peaks will have the same length, if a vector each value will correspond to
@@ -33,7 +33,7 @@ synthetic_signal <- function(peaks = 3,
                              length_out = 1000,
                              intensity = 1000,
                              alpha= 0,
-                             xi = 0,
+                             omega = 2,
                              length_peaks = NULL,
                              baseline = NULL,
                              noise = NULL){
@@ -42,20 +42,20 @@ synthetic_signal <- function(peaks = 3,
     n_peaks <- max(peaks,
                    length(intensity),
                    length(alpha),
-                   length(xi),
+                   length(omega),
                    length(length_peaks))
   } else {
     n_peaks <- max(length(peaks),
                    length(intensity),
                    length(alpha),
-                   length(xi),
+                   length(omega),
                    length(length_peaks))
   }
 
   if (!((length(peaks) == 1 | length(peaks) == n_peaks) &
         (length(intensity) == 1 | length(intensity) == n_peaks) &
         (length(alpha) == 1 | length(alpha) == n_peaks) &
-        (length(xi) == 1 | length(xi) == n_peaks) &
+        (length(omega) == 1 | length(omega) == n_peaks) &
         (is.null(length_peaks) | length(length_peaks) == n_peaks))){
     stop("One or more arguments do not coincide with the number of peaks")
   }
@@ -89,9 +89,9 @@ synthetic_signal <- function(peaks = 3,
   if (length(alpha) == 1){
     alpha <- rep(alpha, n_peaks)
   }
-  # Create xi vector
-  if (length(xi) == 1){
-    xi <- rep(xi, n_peaks)
+  # Create omega vector
+  if (length(omega) == 1){
+    omega <- rep(omega, n_peaks)
   }
   # Create intensity vector
   if (length(intensity) == 1){
@@ -102,7 +102,7 @@ synthetic_signal <- function(peaks = 3,
     peak <- generate_peak(intensity = intensity[i],
                           length_peak = length_peaks[i],
                           alpha = alpha[i],
-                          xi = xi[i])
+                          omega = omega[i])
     signal <- add_peak(signal = signal, peak = peak, start = starts[i])
   }
   signal <- signal[1:length_out]
@@ -132,7 +132,7 @@ synthetic_signal <- function(peaks = 3,
 #' peak can move
 #' @param alpha for skewed normal distribution, modifies the first half of the
 #' peak
-#' @param xi for skewed normal distribution, moves the center of the
+#' @param omega for skewed normal distribution, moves the center of the
 #' distribution
 #' @param baseline A vector that will be added to the base signal, if != NULL
 #' length_out will be ignored and calculated with the length of this vector.
@@ -152,8 +152,8 @@ synthetic_chromatogram<- function(n_peaks,
                                   intensity = 1000,
                                   random_intensity = NULL,
                                   mov_peaks = NULL,
-                                  alpha = 3,
-                                  xi = -2,
+                                  alpha = 5,
+                                  omega = 4,
                                   baseline = NULL,
                                   noise = NULL){
   max_peak <- 104 * exp(0.4 * seq(1,n_peaks)) - 104 ##FIXME seq con n_peaks no ideal
@@ -176,18 +176,17 @@ synthetic_chromatogram<- function(n_peaks,
                         n_peaks,
                         replace = TRUE)
   }
-  length_peaks <- seq(from = length_out/(n_peaks*3), to = (length_out*3)/n_peaks, length.out=n_peaks)
+  length_peaks <- seq(from = length_out/(n_peaks*2), to = (length_out*2)/n_peaks, length.out=n_peaks)
   chromatogram <- synthetic_signal(peaks = peaks,
                                    length_out = length_out,
                                    intensity = intensity,
                                    alpha = alpha,
-                                   xi = xi,
+                                   omega = omega,
                                    length_peaks = length_peaks,
                                    baseline = baseline,
                                    noise = noise)
   return(chromatogram)
 }
-
 
 #' Create Synthetic dataset.
 #'
@@ -234,15 +233,16 @@ synthetic_dataset <- function(n_samples,
 #' @param length_peak Length of the peak in indexes.
 #' @param alpha for skewed normal distribution, modifies the first half of the
 #' peak
-#' @param xi for skewed normal distribution, moves the center of the
-#' distribution
+#' @param omega for skewed normal distribution, modifies with of the peak
 #'
 #' @return A vector with a peak.
 #' @keywords internal
 
-
-generate_peak <- function(intensity = 1, length_peak = 100, alpha = 3, xi = -2){
-  p <- sn::dsn(seq(-3, 3, length.out = length_peak), alpha = alpha, xi = xi)
+generate_peak <- function(intensity = 1, length_peak = 100, alpha = 0, omega = 1){
+  p <- sn::dsn(seq(-10, 10, length.out = length_peak),
+               alpha = alpha,
+               omega = omega,
+               xi = -omega)
   peak <- ((p - min(p)) / (max(p) - min(p))) * intensity
   return(peak)
 }

@@ -4,7 +4,7 @@
 \alias{generate_peak}
 \title{Peak generator.}
 \usage{
-generate_peak(intensity = 1, length_peak = 100, alpha = 3, xi = -2)
+generate_peak(intensity = 1, length_peak = 100, alpha = 0, omega = 1)
 }
 \arguments{
 \item{intensity}{Maximum intensity of the peak.}
@@ -14,8 +14,7 @@ generate_peak(intensity = 1, length_peak = 100, alpha = 3, xi = -2)
 \item{alpha}{for skewed normal distribution, modifies the first half of the
 peak}
 
-\item{xi}{for skewed normal distribution, moves the center of the
-distribution}
+\item{omega}{for skewed normal distribution, modifies with of the peak}
 }
 \value{
 A vector with a peak.

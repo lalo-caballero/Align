@@ -10,8 +10,8 @@ synthetic_chromatogram(
   intensity = 1000,
   random_intensity = NULL,
   mov_peaks = NULL,
-  alpha = 3,
-  xi = -2,
+  alpha = 5,
+  omega = 4,
   baseline = NULL,
   noise = NULL
 )
@@ -32,7 +32,7 @@ peak can move}
 \item{alpha}{for skewed normal distribution, modifies the first half of the
 peak}
 
-\item{xi}{for skewed normal distribution, moves the center of the
+\item{omega}{for skewed normal distribution, moves the center of the
 distribution}
 
 \item{baseline}{A vector that will be added to the base signal, if != NULL

@@ -9,7 +9,7 @@ synthetic_signal(
   length_out = 1000,
   intensity = 1000,
   alpha = 0,
-  xi = 0,
+  omega = 2,
   length_peaks = NULL,
   baseline = NULL,
   noise = NULL
@@ -28,7 +28,7 @@ a peak.}
 \item{alpha}{For the shape of each peak, if a vector each value will
 correspond to a peak, changes the shape to the first half of each peak}
 
-\item{xi}{For the shape of each peak, if a vector each value will
+\item{omega}{For the shape of each peak, if a vector each value will
 correspond to a peak, changes the center of the peak}
 
 \item{length_peaks}{The length of each peak (in indexes), if a scalar all

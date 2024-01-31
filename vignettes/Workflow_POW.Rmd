@@ -62,12 +62,12 @@ register(SnowParam(workers = 2,
 
 ```{r}
 set.seed(100)
-data <- create_synthetic_dataset(n_samples = 15,
-                                 n_peaks = 10,
-                                 length_out = 1500,
-                                 mov_peaks = 5,
-                                 intensity = 500,
-                                 random_intensity = 50)
+data <- synthetic_dataset(n_samples = 15,
+                          n_peaks = 10,
+                          length_out = 1500,
+                          mov_peaks = 5,
+                          intensity = 500,
+                          random_intensity = 50)
 ```
 
 ```{r}
