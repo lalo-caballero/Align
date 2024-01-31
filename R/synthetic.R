@@ -134,6 +134,9 @@ synthetic_signal <- function(peaks = 3,
 #' peak
 #' @param xi for skewed normal distribution, moves the center of the
 #' distribution
+#' @param baseline A vector that will be added to the base signal, if != NULL
+#' length_out will be ignored and calculated with the length of this vector.
+#' @param noise An scalar with the intensity of the noise desired.
 #'
 #' @return a vector that contains a synthetic chromatogram
 #' @export
@@ -150,9 +153,11 @@ synthetic_chromatogram<- function(n_peaks,
                                   random_intensity = NULL,
                                   mov_peaks = NULL,
                                   alpha = 3,
-                                  xi = -2){
-  max_peak <- 104 * exp(0.4 * seq(0,n_peaks)) - 104 ##FIXME seq con n_peaks no ideal
-  max_peak <- utils::tail(which(max_peak < (length_out - floor(length_out / n_peaks))), 1) - 1
+                                  xi = -2,
+                                  baseline = NULL,
+                                  noise = NULL){
+  max_peak <- 104 * exp(0.4 * seq(1,n_peaks)) - 104 ##FIXME seq con n_peaks no ideal
+  max_peak <- utils::tail(which(max_peak <= (length_out - (length_out / n_peaks))), 1)
   x <- seq(0.1, max_peak, length.out = n_peaks)
   if (!is.null(mov_peaks)){
     mov_peaks <- (x[2]-x[1])/mov_peaks
@@ -165,19 +170,24 @@ synthetic_chromatogram<- function(n_peaks,
   if (peaks[1] < 1 ){
     peaks[1] <- 1
   }
-    if (!is.null(random_intensity)){
-      intensity <- sample(seq((intensity - random_intensity),
-                              (intensity + random_intensity)),
-                          n_peaks,
-                          replace = TRUE)
-    }
+  if (!is.null(random_intensity)){
+    intensity <- sample(seq((intensity - random_intensity),
+                            (intensity + random_intensity)),
+                        n_peaks,
+                        replace = TRUE)
+  }
+  length_peaks <- seq(from = length_out/(n_peaks*3), to = (length_out*3)/n_peaks, length.out=n_peaks)
   chromatogram <- synthetic_signal(peaks = peaks,
                                    length_out = length_out,
                                    intensity = intensity,
                                    alpha = alpha,
-                                   xi= xi)
+                                   xi = xi,
+                                   length_peaks = length_peaks,
+                                   baseline = baseline,
+                                   noise = noise)
   return(chromatogram)
 }
+
 
 #' Create Synthetic dataset.
 #'
@@ -192,12 +202,12 @@ synthetic_chromatogram<- function(n_peaks,
 #' @export
 #'
 #' @examples
-#' create_synthetic_dataset(10, 10, 1000, 5)
-#' create_synthetic_dataset(n_samples = 20,
+#' synthetic_dataset(10, 10, 1000, 5)
+#' synthetic_dataset(n_samples = 20,
 #'                          n_peaks = 7,
 #'                          length_out = 100,
 #'                          mov_peaks = 10)
-create_synthetic_dataset <- function(n_samples,
+synthetic_dataset <- function(n_samples,
                                      n_peaks,
                                      length_out,
                                      mov_peaks,

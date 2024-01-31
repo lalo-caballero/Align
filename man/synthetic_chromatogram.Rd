@@ -11,7 +11,9 @@ synthetic_chromatogram(
   random_intensity = NULL,
   mov_peaks = NULL,
   alpha = 3,
-  xi = -2
+  xi = -2,
+  baseline = NULL,
+  noise = NULL
 )
 }
 \arguments{
@@ -32,6 +34,11 @@ peak}
 
 \item{xi}{for skewed normal distribution, moves the center of the
 distribution}
+
+\item{baseline}{A vector that will be added to the base signal, if != NULL
+length_out will be ignored and calculated with the length of this vector.}
+
+\item{noise}{An scalar with the intensity of the noise desired.}
 }
 \value{
 a vector that contains a synthetic chromatogram

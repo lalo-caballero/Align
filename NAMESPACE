@@ -2,10 +2,10 @@
 
 export(apply_pow)
 export(compute_val_error)
-export(create_synthetic_dataset)
 export(interpolation)
 export(optimize_params)
 export(pow)
 export(select_reference)
 export(synthetic_chromatogram)
+export(synthetic_dataset)
 export(synthetic_signal)
