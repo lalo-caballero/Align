@@ -68,7 +68,7 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
       w <- w - dw
     }
     C <- W %*% G %*% G + lambda2 * Matrix::t(D) %*% D + lambda1 * P
-    dw <- as.vector(Matrix::solve(C, (W %*% g * r), tol = 1e-21))
+    dw <- as.vector(Matrix::solve(C, (W %*% g * r), tol = 1e-25))
     w <- w + dw
     diffw <- c(w[2] - w[1], 0.5 * (w[3 : length(w)] - w[1 : (length(w) - 2)]), w[length(w)]-w[(length(w) - 1)])
     diffw <- as.numeric(diffw <= 0)
