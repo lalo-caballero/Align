@@ -8,7 +8,6 @@ output:
     df_print: "kable"
     dev: png
 package: pow
-author: "pow authors"
 date: "`r format(Sys.Date(), '%F')`"
 abstract: >
   An introduction to the workflow to optimize and apply the POW algotithm to a
