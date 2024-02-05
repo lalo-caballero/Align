@@ -59,14 +59,17 @@ val <- function(X, y, W, iv, lambdas, fom){
     sel <- interp$s
     sel_x <- intersect(sel, iv)
     sel_xw <- match(sel_x, sel)
+    if (length(xw) == 0){
+      e[l] <- NA
+    } else {
+      y_norm <- y[sel_x] / norm(y[sel_x],"2")
+      xw_norm <- xw[sel_xw] / norm(xw[sel_xw],"2")
 
-    y_norm <- y[sel_x] / norm(y[sel_x],"2")
-    xw_norm <- xw[sel_xw] / norm(xw[sel_xw],"2")
-
-    if (fom == 'rms') {
-      e[l] <- sqrt(sum((y_norm - xw_norm) * (y_norm - xw_norm)) / length(xw_norm))
-    } else if (fom == 'cor') {
-      e[l] <- 1 - sum(y_norm * xw_norm)
+      if (fom == 'rms') {
+        e[l] <- sqrt(sum((y_norm - xw_norm) * (y_norm - xw_norm)) / length(xw_norm))
+      } else if (fom == 'cor') {
+        e[l] <- 1 - sum(y_norm * xw_norm)
+      }
     }
   }
   return(list(e = e, ti = ti))
