@@ -7,11 +7,11 @@
 #' @param x Signal to fit.
 #' @param y Reference signal.
 #' @param lambda1 Regularization parameter for second derivative of warp
-#' @param lambda2 Penalty for negative values of firsT derivative of warp
+#' @param lambda2 Penalty for negative values of first derivative of warp
 #' @param W A 'diagonal matrix' with weights.
 #' @param max_it Maximum amount of iterations.
 #' @param min_drms minimum difference in absolute value of RMS.
-#' @param verbose by default 'FALSE'to privide information in the console
+#' @param verbose by default 'FALSE' to provide information in the console
 #'
 #' @return warp
 #'
@@ -42,10 +42,13 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
   I <- Matrix::diag(length(y))
   D <- diff(I, differences = 2)
   D <- methods::as(D, "dgCMatrix")
-  for (it in 1 : max_it) {
+  for (it in 1:max_it) {
     r <- rep(0, m)
     g <- rep(0, m)
     inter <- interpolation(w, x)
+    if (length(inter$f) == 0){
+      break
+    }
     z <- inter$f / norm(inter$f, "2")
     sel <- inter$s
     dg <- inter$g
@@ -68,7 +71,8 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
       w <- w - dw
     }
     C <- W %*% G %*% G + lambda2 * Matrix::t(D) %*% D + lambda1 * P
-    dw <- as.vector(Matrix::solve(C, (W %*% g * r), tol = 1e-25))
+
+    dw <- as.vector(Matrix::solve(C, (W %*% g * r), tol = 1e-20))
     w <- w + dw
     diffw <- c(w[2] - w[1], 0.5 * (w[3 : length(w)] - w[1 : (length(w) - 2)]), w[length(w)]-w[(length(w) - 1)])
     diffw <- as.numeric(diffw <= 0)

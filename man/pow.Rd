@@ -18,7 +18,7 @@ pow(
 \arguments{
 \item{x}{Signal to fit.}
 
-\item{lambda2}{Penalty for negative values of firsT derivative of warp}
+\item{lambda2}{Penalty for negative values of first derivative of warp}
 
 \item{y}{Reference signal.}
 
@@ -30,7 +30,7 @@ pow(
 
 \item{min_drms}{minimum difference in absolute value of RMS.}
 
-\item{verbose}{by default 'FALSE'to privide information in the console}
+\item{verbose}{by default 'FALSE' to provide information in the console}
 }
 \value{
 warp
