@@ -48,6 +48,7 @@ compute_val_error <- function(X, y, W, iv, lambdas,
 #' @keywords internal
 
 val <- function(X, y, W, iv, lambdas, fom){
+  requireNamespace("Matrix", quietly = TRUE)
   e <- rep(0, length(lambdas))
   ti <- rep(0, length(lambdas))
   for (l in 1:length(lambdas)) {
