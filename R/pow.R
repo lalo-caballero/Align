@@ -63,7 +63,7 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
     rms_old <- rms
     if (it == 1) {
       C <- W %*% G %*% G + lambda2 * Matrix::t(D) %*% D
-      dw <- as.vector(Matrix::solve(C, (W %*% g * r)))
+      dw <- as.vector(Matrix::solve(C, (W %*% g * r), tol = 1e-20))
       w <- w + dw
       diffw <- c(w[2] - w[1], 0.5 * (w[3 : length(w)] - w[1 : (length(w) - 2)]), w[length(w)]-w[(length(w) - 1)])
       diffw <- as.numeric(diffw <= 0)
@@ -102,13 +102,13 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
 #'
 #' @export
 
-apply_pow <- function(X, lambdas, y, max_it = 1000, return_warps = FALSE){
+apply_pow <- function(X, lambdas, y, max_it = 1000, return_warps = FALSE, lambda1 = 10^6){
 
   n_samples <- nrow(X)
   XW <- X * 0
   W <- list()
   for (i in 1:n_samples){
-    w <- pow(X[i, ], lambdas[i], y, max_it = max_it)
+    w <- pow(X[i, ], lambdas[i], y, max_it = max_it, lambda1 = lambda1)
     interp <- interpolation(w, X[i, ])
     xw <- interp$f
     sel <- interp$s

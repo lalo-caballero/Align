@@ -14,7 +14,7 @@
 #' @export
 
 compute_val_error <- function(X, y, W, iv, lambdas,
-                              fom = 'rms',
+                              fom = 'rms', lambda1 = 10^6,
                               parallel = TRUE) {
   if (parallel){
     result_parallel <- BiocParallel::bplapply(X = as.list(data.frame(t(X))),
@@ -23,7 +23,8 @@ compute_val_error <- function(X, y, W, iv, lambdas,
                                               W = W,
                                               iv = iv,
                                               lambdas = lambdas,
-                                              fom = fom)
+                                              fom = fom,
+                                              lambda1 = lambda1)
     e_ix <- t(as.data.frame(lapply(result_parallel, '[', 1)))
     ti_ix <- t(as.data.frame(lapply(result_parallel, '[', 2)))
     rownames(e_ix) <- NULL
@@ -32,7 +33,7 @@ compute_val_error <- function(X, y, W, iv, lambdas,
     e_ix <- matrix(nrow = nrow(X), ncol = length(lambdas))
     ti_ix <- matrix(nrow = nrow(X), ncol = length(lambdas))
     for (i in 1:nrow(X)){
-      result_val <- val(X[i, ], y, W, iv, lambdas, fom)
+      result_val <- val(X[i, ], y, W, iv, lambdas, 'rms')
       e_ix[i, ] <- result_val$e
       ti_ix[i, ] <- result_val$ti
     }
@@ -47,12 +48,12 @@ compute_val_error <- function(X, y, W, iv, lambdas,
 #' @return list with e and i
 #' @keywords internal
 
-val <- function(X, y, W, iv, lambdas, fom){
+val <- function(X, y, W, iv, lambdas, fom = "rms", lambda1 = 10^6){
   requireNamespace("Matrix", quietly = TRUE)
   e <- rep(0, length(lambdas))
   ti <- rep(0, length(lambdas))
   for (l in 1:length(lambdas)) {
-    w <- pow(x = X, lambda2 = lambdas[l], y = y, W = W)
+    w <- pow(x = X, lambda2 = lambdas[l], y = y, W = W, lambda1 = lambda1)
     diff_w <- diff(w)
     ti[l] <- any(diff_w < 0)
     interp <- interpolation(w, X)
