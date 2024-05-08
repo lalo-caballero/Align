@@ -91,9 +91,10 @@ pow <- function(x, lambda2, y, lambda1 = 10^6, W = NULL, max_it = 100, min_drms 
 #'
 #' @param X A matrix with the samples to align
 #' @param y The reference signal
-#' @param lambdas the lambda to be used for the alignment of each sample
+#' @param lambdas the lambda to be used for the alignment of each sample, penalty to avoid big changes
 #' @param max_it maximum iterations to be done in the POW alignment
 #' @param return_warps if TRUE it returns a list with warped samples and warps
+#' @param lambda1 Penalty to avoid time inversions.
 #'
 #' @return can be either a list with:
 #' samples = a matrix with the warped samples

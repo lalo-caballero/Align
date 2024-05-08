@@ -4,7 +4,7 @@
 \alias{val}
 \title{Validation}
 \usage{
-val(X, y, W, iv, lambdas, fom)
+val(X, y, W, iv, lambdas, fom = "rms", lambda1 = 10^6)
 }
 \arguments{
 \item{X}{Matrix with data to be aligned (one sample per row).}
@@ -18,6 +18,8 @@ val(X, y, W, iv, lambdas, fom)
 \item{lambdas}{a vector with the penalties to test the POW.}
 
 \item{fom}{figure of merit to use ('rms' or 'cor').}
+
+\item{lambda1}{Penalty to avoid time inversions.}
 }
 \value{
 list with e and i

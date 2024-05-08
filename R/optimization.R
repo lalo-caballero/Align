@@ -6,6 +6,7 @@
 #' @param y Reference sample.
 #' @param W A matrix with of weights.
 #' @param fom figure of merit to use ('rms' or 'cor').
+#' @param lambda1 Penalty to avoid time inversions.
 #' @param iv indexes of the points used to validate.
 #' @param lambdas a vector with the penalties to test the POW.
 #' @param parallel Enable parallelization with BiocParallel

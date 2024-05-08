@@ -4,18 +4,20 @@
 \alias{apply_pow}
 \title{Apply POW}
 \usage{
-apply_pow(X, lambdas, y, max_it = 1000, return_warps = FALSE)
+apply_pow(X, lambdas, y, max_it = 1000, return_warps = FALSE, lambda1 = 10^6)
 }
 \arguments{
 \item{X}{A matrix with the samples to align}
 
-\item{lambdas}{the lambda to be used for the alignment of each sample}
+\item{lambdas}{the lambda to be used for the alignment of each sample, penalty to avoid big changes}
 
 \item{y}{The reference signal}
 
 \item{max_it}{maximum iterations to be done in the POW alignment}
 
 \item{return_warps}{if TRUE it returns a list with warped samples and warps}
+
+\item{lambda1}{Penalty to avoid time inversions.}
 }
 \value{
 can be either a list with:

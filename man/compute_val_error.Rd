@@ -4,7 +4,16 @@
 \alias{compute_val_error}
 \title{Compute validation error.}
 \usage{
-compute_val_error(X, y, W, iv, lambdas, fom = "rms", parallel = TRUE)
+compute_val_error(
+  X,
+  y,
+  W,
+  iv,
+  lambdas,
+  fom = "rms",
+  lambda1 = 10^6,
+  parallel = TRUE
+)
 }
 \arguments{
 \item{X}{Matrix with data to be aligned (one sample per row).}
@@ -18,6 +27,8 @@ compute_val_error(X, y, W, iv, lambdas, fom = "rms", parallel = TRUE)
 \item{lambdas}{a vector with the penalties to test the POW.}
 
 \item{fom}{figure of merit to use ('rms' or 'cor').}
+
+\item{lambda1}{Penalty to avoid time inversions.}
 
 \item{parallel}{Enable parallelization with BiocParallel}
 }
