@@ -34,7 +34,7 @@ library(BiocParallel)
 ```{r }
 # Enable parallelization, to make it faster you can increase workers up to the
 # number of cores available.
-register(SnowParam(workers = 2, 
+register(SnowParam(workers = parallel::detectCores()/2, 
                    progressbar =interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
@@ -84,8 +84,8 @@ W <- Matrix::Diagonal(x = v)
 
 ```{r}
 lambdas <- pracma::logspace(-3, 5, 128)
-val<-compute_val_error(X, y, W, iv, lambdas)
-opar = optimize_params(n_samples, lambdas, val$ti_ix, val$e_ix)
+val <- compute_val_error(X, y, W, iv, lambdas)
+opar <- optimize_params(n_samples, lambdas, val$ti_ix, val$e_ix)
 best_lambdas2 <- opar$best_params
 ```
 
