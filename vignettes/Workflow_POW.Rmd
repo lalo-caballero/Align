@@ -34,7 +34,7 @@ library(BiocParallel)
 ```{r }
 # Enable parallelization, to make it faster you can increase workers up to the
 # number of cores available.
-register(SnowParam(workers = parallel::detectCores()/2, 
+register(SnowParam(workers = 2, 
                    progressbar =interactive() && 
                      is.null(getOption("knitr.in.progress")), 
                    exportglobals = FALSE), 
