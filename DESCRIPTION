@@ -35,7 +35,6 @@ Suggests:
     cowplot,
     ggplot2,
     knitr,
-    pracma,
     ptw,
     reshape2,
     rmarkdown,
@@ -46,6 +45,7 @@ BugReports: https://github.com/sipss/pow/issues
 Imports: 
     Matrix,
     methods,
+    pracma,
     sn,
     stats,
     utils
