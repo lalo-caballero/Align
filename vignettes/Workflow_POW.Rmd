@@ -28,6 +28,8 @@ knitr::opts_chunk$set(
 library(pow)
 library(ggplot2)
 library(BiocParallel)
+library(reshape2)
+library(cowplot)
 ```
 
 
@@ -96,7 +98,7 @@ XW <- apply_pow(X, best_lambdas2, y)
 ```{r}
 df_raw <- data.frame(t(X))
 df_raw <- cbind(df_raw ,Time = c(1:nrow(df_raw)))
-df_raw <- reshape2::melt(df_raw, "Time")
+df_raw <- melt(df_raw, "Time")
 raw_data <- ggplot(data = df_raw, aes(x = Time, y = value, col = variable)) +
   geom_line() +
   ylab("Intensity") +
@@ -104,13 +106,13 @@ raw_data <- ggplot(data = df_raw, aes(x = Time, y = value, col = variable)) +
 
 df_pow <- data.frame(t(XW))
 df_pow <- cbind(df_pow,Time = c(1:nrow(df_pow)))
-df_pow <- reshape2::melt(df_pow, "Time")
+df_pow <- melt(df_pow, "Time")
 pow_data <- ggplot(data = df_pow, aes(x = Time, y = value, col = variable)) + 
   geom_line() +
   ylab("Intensity") +
   guides(colour = "none")
 
-cowplot::plot_grid(raw_data,pow_data)
+plot_grid(raw_data,pow_data)
 ```
 
 ```{r}
