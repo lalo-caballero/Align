@@ -47,7 +47,7 @@ compute_val_error <- function(X, y, W, iv, lambdas,
 #' @inheritParams compute_val_error
 #'
 #' @return list with e and i
-#' @keywords internal
+#' @export
 
 val <- function(X, y, W, iv, lambdas, fom = "rms", lambda1 = 10^6){
   requireNamespace("Matrix", quietly = TRUE)
